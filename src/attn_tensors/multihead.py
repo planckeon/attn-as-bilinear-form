@@ -133,10 +133,11 @@ def multihead_attention_batched(
     """
     d_k = W_Q.shape[2]
 
-    # Project: Q^{bhia} = Q^{bib} W_Q^{hba}
-    Q_h = jnp.einsum("bib,hba->bhia", Q, W_Q)
-    K_h = jnp.einsum("bjb,hba->bhja", K, W_K)
-    V_h = jnp.einsum("bjb,hbc->bhjc", V, W_V)
+    # Project: Q_h^{bhia} = Q^{bid} W_Q^{hda}
+    # (b=batch, i=seq, d=d_model, h=head, a=d_k)
+    Q_h = jnp.einsum("bid,hda->bhia", Q, W_Q)
+    K_h = jnp.einsum("bjd,hda->bhja", K, W_K)
+    V_h = jnp.einsum("bjd,hdc->bhjc", V, W_V)
 
     # Scores: S^{bhij} = Q^{bhia} K^{bhja} / sqrt(d_k)
     S = jnp.einsum("bhia,bhja->bhij", Q_h, K_h) / jnp.sqrt(d_k)
@@ -155,8 +156,8 @@ def multihead_attention_batched(
     # Output: O^{bhic} = A^{bhij} V^{bhjc}
     O = jnp.einsum("bhij,bhjc->bhic", A, V_h)
 
-    # Project: Y^{bia} = O^{bhic} W_O^{hca}
-    Y = jnp.einsum("bhic,hca->bia", O, W_O)
+    # Project: Y^{bid} = O^{bhic} W_O^{hcd}
+    Y = jnp.einsum("bhic,hcd->bid", O, W_O)
 
     return Y
 

@@ -286,9 +286,9 @@ def separation_quality(patterns: Array) -> float:
     diff = patterns[:, None, :] - patterns[None, :, :]  # (M, M, d)
     distances = jnp.sqrt(jnp.sum(diff**2, axis=-1))  # (M, M)
 
-    # Mask diagonal (self-distance)
-    mask = 1 - jnp.eye(M)
-    distances = distances * mask + jnp.eye(M) * jnp.inf
+    # Mask diagonal (self-distance) - use where to avoid inf * 0 = nan
+    diagonal_mask = jnp.eye(M, dtype=bool)
+    distances = jnp.where(diagonal_mask, jnp.inf, distances)
 
     min_distance = jnp.min(distances)
 
