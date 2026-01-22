@@ -24,6 +24,7 @@ This project recasts the attention mechanism from transformers using the languag
 | Topic | Description |
 |-------|-------------|
 | [Bilinear Forms](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/bilinear/) | Metric tensors, index notation, Riemannian structure |
+| [Einsum Notation](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/einsum/) | Einstein summation, tensor contractions, attention patterns |
 | [Attention Mechanism](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/attention/) | Step-by-step breakdown in index notation |
 | [Gradient Derivations](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/gradients/) | Full backprop derivation, softmax Jacobian |
 | [Statistical Mechanics](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/statistical/) | Gibbs distribution, entropy, Hopfield networks |
@@ -107,11 +108,13 @@ print(results)  # {'dL_dQ': True, 'dL_dK': True, 'dL_dV': True, 'all_correct': T
 |--------|-------------|
 | `attn_tensors.attention` | Core attention operations (scores, weights, output) |
 | `attn_tensors.bilinear` | Metric tensors and bilinear forms |
+| `attn_tensors.einsum` | Einstein summation utilities and examples |
 | `attn_tensors.gradients` | Manual gradient derivations verified against autodiff |
 | `attn_tensors.softmax` | Softmax with temperature, entropy, Gibbs distribution |
 | `attn_tensors.multihead` | Multi-head attention with head splitting |
 | `attn_tensors.masking` | Causal masks, padding masks, local attention masks |
 | `attn_tensors.hopfield` | Modern Hopfield network interpretation |
+| `attn_tensors.backend` | JAX/MLX backend detection and selection |
 
 ## The Core Insight
 
@@ -203,12 +206,14 @@ attn-as-bilinear-form/
 ├── src/attn_tensors/       # Core library
 │   ├── attention.py        # Attention operations
 │   ├── bilinear.py         # Metric tensors, bilinear forms
+│   ├── einsum.py           # Einstein summation utilities
 │   ├── gradients.py        # Manual gradient derivations
 │   ├── softmax.py          # Temperature, entropy, Gibbs
 │   ├── multihead.py        # Multi-head attention
 │   ├── masking.py          # Attention masks
-│   └── hopfield.py         # Hopfield network view
-├── tests/                  # Test suite (400+ tests)
+│   ├── hopfield.py         # Hopfield network view
+│   └── backend.py          # JAX/MLX backend detection
+├── tests/                  # Test suite (465+ tests)
 ├── site/                   # Documentation (Zola)
 │   └── content/theory/     # Theory deep dives
 ├── post.md                 # Tutorial document
@@ -223,6 +228,7 @@ attn-as-bilinear-form/
 4. Su et al. (2021). *RoFormer: Enhanced Transformer with Rotary Position Embedding*.
 5. Press et al. (2022). *ALiBi: Train Short, Test Long*. ICLR.
 6. Amari (1998). *Natural Gradient Works Efficiently in Learning*. Neural Computation.
+7. Sankalp (2024). [*Shape Rotation 101: An Intro to Einsum and Jax Transformers*](https://sankalp.bearblog.dev/einsum-new/).
 
 ## License
 
