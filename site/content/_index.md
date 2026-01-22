@@ -131,10 +131,13 @@ uv run pytest tests/ -v
 
 ## Theory Deep Dives
 
-- [Bilinear Forms and Metrics](/theory/bilinear/)
-- [Attention Mechanism](/theory/attention/)
-- [Gradient Derivations](/theory/gradients/)
-- [Statistical Mechanics View](/theory/statistical/)
+- [Bilinear Forms and Metrics](@/theory/bilinear.md)
+- [Attention Mechanism](@/theory/attention.md)
+- [Gradient Derivations](@/theory/gradients.md)
+- [Statistical Mechanics View](@/theory/statistical.md)
+- [Multi-Head Attention](@/theory/multihead.md)
+- [Positional Encodings](@/theory/positional.md)
+- [Efficient Attention](@/theory/efficient.md)
 
 ---
 

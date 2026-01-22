@@ -111,3 +111,154 @@ Think of attention as a **physical system**:
 - **Partition function** = normalization over states
 
 At low temperature, the system "freezes" into the lowest energy state (highest score). At high temperature, all states are equally likely.
+
+## Energy-Based View
+
+### Attention as Energy Minimization
+
+Define an energy function:
+
+$$E(i, j) = -S^{ij} = -\frac{1}{\sqrt{d_k}} Q^{ia} K^{ja}$$
+
+The attention weight is the Boltzmann probability:
+
+$$A^{ij} = \frac{e^{-\beta E(i,j)}}{Z^i} = \frac{e^{\beta S^{ij}}}{Z^i}$$
+
+### Free Energy
+
+The free energy for query $i$ is:
+
+$$F^i = -\frac{1}{\beta} \log Z^i$$
+
+This has the familiar form:
+
+$$F^i = \langle E \rangle - \frac{1}{\beta} H^i$$
+
+where $\langle E \rangle = -\sum_j A^{ij} S^{ij}$ is the expected energy and $H^i$ is the entropy.
+
+### Variational Principle
+
+The attention weights minimize:
+
+$$A^* = \arg\min_A \left[ \langle E \rangle - \frac{1}{\beta} H(A) \right]$$
+
+subject to $\sum_j A^{ij} = 1$ and $A^{ij} \geq 0$.
+
+This is equivalent to softmax!
+
+## Deep Dive: Hopfield Networks
+
+### Classical Hopfield (1982)
+
+Energy function:
+
+$$E = -\frac{1}{2} \sum_{i,j} W_{ij} s_i s_j$$
+
+where $s_i \in \{-1, +1\}$ and $W_{ij}$ are synaptic weights.
+
+**Update rule:**
+
+$$s_i \leftarrow \text{sign}\left(\sum_j W_{ij} s_j\right)$$
+
+**Storage capacity:** $\sim 0.14 N$ patterns for $N$ neurons.
+
+### Modern Hopfield (Ramsauer et al., 2020)
+
+Energy function:
+
+$$E = -\text{lse}(\beta K \xi) + \frac{1}{2}\xi^T \xi + \text{const}$$
+
+where $\text{lse}(x) = \log \sum_i e^{x_i}$ is the log-sum-exp.
+
+**Update rule:**
+
+$$\xi^{new} = K^T \text{softmax}(\beta K \xi)$$
+
+This is exactly attention! The query $\xi$ is updated to be a weighted combination of stored patterns (rows of $K$).
+
+### Why Exponential Capacity?
+
+Classical Hopfield fails when patterns have overlap (correlation). The error probability grows with pattern density.
+
+Modern Hopfield uses exponential separation:
+
+$$\text{softmax}(\beta x)_i \approx \begin{cases}
+1 & x_i = \max(x) \\
+e^{-\beta \Delta} & x_i = \max(x) - \Delta
+\end{cases}$$
+
+For large $\beta$, even small separation $\Delta$ gives clean retrieval.
+
+**Capacity:** $\sim \exp(d/2)$ patterns in $d$ dimensions!
+
+### Attention as Associative Memory
+
+| Attention | Hopfield |
+|-----------|----------|
+| Query $Q$ | Pattern to retrieve |
+| Keys $K$ | Stored patterns |
+| Values $V$ | Pattern outputs |
+| Softmax | Update rule |
+| Output $O$ | Retrieved pattern |
+
+## Worked Example: Pattern Retrieval
+
+**Setup:** Store 3 patterns as keys, retrieve closest to query.
+
+$$K = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 0.7 & 0.7 \end{pmatrix}, \quad q = \begin{pmatrix} 0.9 \\ 0.1 \end{pmatrix}$$
+
+**Step 1: Compute scores**
+
+$$s = K q = \begin{pmatrix} 0.9 \\ 0.1 \\ 0.7 \end{pmatrix}$$
+
+**Step 2: Apply softmax** (with $\beta = 1$)
+
+$$a = \text{softmax}(s) \approx \begin{pmatrix} 0.48 \\ 0.22 \\ 0.30 \end{pmatrix}$$
+
+**Step 3: Retrieve pattern**
+
+$$\xi^{new} = K^T a = \begin{pmatrix} 0.48 + 0.21 \\ 0.22 + 0.21 \end{pmatrix} = \begin{pmatrix} 0.69 \\ 0.43 \end{pmatrix}$$
+
+The query moved toward pattern 1 (which it was closest to).
+
+**With high temperature** ($\beta = 5$):
+
+$$a = \text{softmax}(5s) \approx \begin{pmatrix} 0.88 \\ 0.01 \\ 0.11 \end{pmatrix}$$
+
+Now retrieval is sharper—almost pure pattern 1.
+
+## Thermodynamic Quantities
+
+### Heat Capacity
+
+The heat capacity measures sensitivity to temperature:
+
+$$C = \frac{\partial \langle E \rangle}{\partial T} = \beta^2 \text{Var}(E)$$
+
+High heat capacity near phase transitions—when attention is "deciding" between multiple keys.
+
+### Susceptibility
+
+Response to perturbation in scores:
+
+$$\chi^{ij}_{kl} = \frac{\partial A^{ij}}{\partial S^{kl}}$$
+
+This is exactly the softmax Jacobian we derived for gradients!
+
+## Connection to Information Theory
+
+### Mutual Information
+
+The attention weights encode mutual information:
+
+$$I(Q; K) \approx H(A) - H(A|Q)$$
+
+where $H(A)$ is the entropy of attention patterns.
+
+### KL Divergence and Attention
+
+The softmax minimizes KL divergence to a uniform prior:
+
+$$A^* = \arg\min_A \left[ -\sum_j A^{ij} S^{ij} + \frac{1}{\beta} D_{KL}(A \| U) \right]$$
+
+where $U$ is the uniform distribution.

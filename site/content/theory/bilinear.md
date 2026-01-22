@@ -109,3 +109,79 @@ Q = jnp.randn(10, d)  # 10 queries
 K = jnp.randn(20, d)  # 20 keys
 scores = bilinear_form_batch(Q, K, g)  # shape: (10, 20)
 ```
+
+## Worked Example: Computing Bilinear Forms
+
+Let's compute attention scores step-by-step with a tiny example.
+
+**Setup:**
+- Dimension $d = 3$
+- Query: $q = [1, 2, 1]$
+- Key: $k = [2, 1, 0]$
+- Metric: $g = \frac{1}{\sqrt{3}} I_3$ (scaled identity)
+
+**Step 1: Write out the metric tensor**
+
+$$g_{ab} = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$$
+
+**Step 2: Compute the bilinear form**
+
+$$B(q, k) = q^a g_{ab} k^b = \frac{1}{\sqrt{3}} \sum_{a=1}^{3} q^a k^a$$
+
+$$= \frac{1}{\sqrt{3}} (1 \cdot 2 + 2 \cdot 1 + 1 \cdot 0)$$
+
+$$= \frac{1}{\sqrt{3}} (2 + 2 + 0) = \frac{4}{\sqrt{3}} \approx 2.31$$
+
+**Interpretation:** This is the attention score between this query-key pair.
+
+## Generalized Metrics: Learning Similarity
+
+### Mahalanobis Distance
+
+A learned metric $g_{ab} = (W^T W)_{ab}$ gives:
+
+$$B(q, k) = q^T W^T W k = (Wq)^T (Wk)$$
+
+This computes dot product in a transformed space!
+
+### Asymmetric Bilinear Forms
+
+We can also use non-symmetric matrices:
+
+$$B(q, k) = q^T M k$$
+
+where $M$ is not necessarily symmetric. This allows different "meanings" for queries vs keys.
+
+### Connection to Kernel Methods
+
+The bilinear form defines a kernel:
+
+$$K(q, k) = \exp(q^T g k)$$
+
+This is a valid Mercer kernel when $g$ is positive definite.
+
+## Differential Geometry Perspective
+
+### Tangent Vectors and Cotangent Vectors
+
+In differential geometry:
+- **Contravariant vectors** $v^a$: Tangent vectors (directions)
+- **Covariant vectors** $u_a$: Cotangent vectors (linear functionals)
+
+The metric converts between them:
+- Lower: $v_a = g_{ab} v^b$
+- Raise: $v^a = g^{ab} v_b$
+
+### Musical Isomorphisms
+
+In differential geometry notation:
+- $\flat$ (flat): Lowers index, $v^\flat = g(v, \cdot)$
+- $\sharp$ (sharp): Raises index, $\omega^\sharp = g^{-1}(\omega, \cdot)$
+
+### Inner Product Structure
+
+The metric defines an inner product on the tangent space:
+
+$$\langle u, v \rangle_g = u^a g_{ab} v^b$$
+
+This measures "lengths" and "angles" in feature space.

@@ -111,3 +111,129 @@ print(results)
 2. **Debugging**: Verify your understanding is correct
 3. **Optimization**: Sometimes manual gradients enable tricks (e.g., Flash Attention)
 4. **Insight**: See gradient flow and potential issues (vanishing/exploding)
+
+## Deriving the Softmax Jacobian
+
+The softmax Jacobian is crucial for understanding gradient flow. Let's derive it carefully.
+
+### Setup
+
+Given scores $S = [s_1, \ldots, s_n]$, the softmax outputs are:
+
+$$a_i = \frac{e^{s_i}}{\sum_k e^{s_k}} = \frac{e^{s_i}}{Z}$$
+
+We want $\frac{\partial a_i}{\partial s_j}$.
+
+### Case 1: $i = j$ (Diagonal elements)
+
+Using the quotient rule:
+
+$$\frac{\partial a_i}{\partial s_i} = \frac{e^{s_i} \cdot Z - e^{s_i} \cdot e^{s_i}}{Z^2} = \frac{e^{s_i}}{Z} - \frac{e^{2s_i}}{Z^2}$$
+
+$$= a_i - a_i^2 = a_i(1 - a_i)$$
+
+### Case 2: $i \neq j$ (Off-diagonal elements)
+
+$$\frac{\partial a_i}{\partial s_j} = \frac{0 \cdot Z - e^{s_i} \cdot e^{s_j}}{Z^2} = -\frac{e^{s_i} e^{s_j}}{Z^2}$$
+
+$$= -a_i a_j$$
+
+### Combined Formula
+
+$$\frac{\partial a_i}{\partial s_j} = a_i(\delta_{ij} - a_j)$$
+
+Or in matrix form:
+
+$$\frac{\partial A}{\partial S} = \text{diag}(a) - a a^T$$
+
+### In Index Notation with Batch Dimension
+
+For attention matrix $A^{ij}$ (query $i$, key $j$):
+
+$$\frac{\partial A^{ij}}{\partial S^{mn}} = \delta^i_m A^{ij}(\delta^j_n - A^{in})$$
+
+The $\delta^i_m$ enforces that softmax is independent across queries.
+
+## Gradient Flow Analysis
+
+### Vanishing Gradients in Sharp Attention
+
+When attention is very peaked ($A^{ij} \approx 1$ for one $j$, 0 elsewhere):
+
+$$\frac{\partial L}{\partial S^{ij}} = A^{ij}(\bar{A}^{ij} - \sum_{j'} A^{ij'}\bar{A}^{ij'})$$
+
+If $A^{ij} \approx 1$ and $A^{ij'} \approx 0$ for $j' \neq j$:
+
+$$\frac{\partial L}{\partial S^{ij}} \approx 1 \cdot (\bar{A}^{ij} - \bar{A}^{ij}) = 0$$
+
+The gradient vanishes! This is the "hard attention" problem.
+
+### Temperature Scaling for Better Gradients
+
+Using temperature $\tau$:
+
+$$A^{ij} = \text{softmax}(S^{ij}/\tau)$$
+
+Higher $\tau$ → softer attention → better gradient flow.
+
+## Numerical Stability
+
+### Log-Sum-Exp Trick
+
+Computing softmax naively:
+
+```python
+exp_s = exp(s)  # Can overflow!
+a = exp_s / sum(exp_s)
+```
+
+Stable version:
+
+```python
+s_max = max(s)
+exp_s = exp(s - s_max)  # Subtract max for stability
+a = exp_s / sum(exp_s)
+```
+
+### Gradient with Numerical Stability
+
+The gradient $\frac{\partial L}{\partial S} = A \odot (\bar{A} - \text{rowsum}(A \odot \bar{A}))$ is already stable because:
+- $A$ is normalized (no overflow)
+- Operations are on bounded quantities
+
+## Complete Backward Pass Algorithm
+
+```python
+def attention_backward(dL_dO, Q, K, V, A):
+    """
+    Args:
+        dL_dO: Gradient w.r.t. output, shape (n_q, d_v)
+        Q, K, V: Forward pass inputs
+        A: Attention weights from forward pass
+    
+    Returns:
+        dL_dQ, dL_dK, dL_dV
+    """
+    d_k = Q.shape[-1]
+    scale = 1.0 / sqrt(d_k)
+    
+    # Step 1: Gradient w.r.t. Values
+    # O = A @ V, so dL_dV = A.T @ dL_dO
+    dL_dV = A.T @ dL_dO
+    
+    # Step 2: Gradient w.r.t. Attention weights
+    # O = A @ V, so dL_dA = dL_dO @ V.T
+    dL_dA = dL_dO @ V.T
+    
+    # Step 3: Gradient through softmax
+    # dL_dS = A * (dL_dA - sum(A * dL_dA, axis=-1, keepdims=True))
+    sum_term = (A * dL_dA).sum(axis=-1, keepdims=True)
+    dL_dS = A * (dL_dA - sum_term)
+    
+    # Step 4: Gradient w.r.t. Queries and Keys
+    # S = scale * Q @ K.T
+    dL_dQ = scale * dL_dS @ K
+    dL_dK = scale * dL_dS.T @ Q
+    
+    return dL_dQ, dL_dK, dL_dV
+```
