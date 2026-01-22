@@ -103,7 +103,7 @@ scores = bilinear_form_batch(Q, K, g)
 
 ```bash
 # Clone the repository
-git clone https://github.com/bkataru-workshop/attn-as-bilinear-form
+git clone https://github.com/planckeon/attn-as-bilinear-form
 cd attn-as-bilinear-form
 
 # Install with uv
