@@ -130,7 +130,7 @@ $$O^{ib} = A^{ij} V^{jb}, \quad A^{ij} = \frac{\exp(S^{ij})}{\sum_k \exp(S^{ik})
 
 The score computation is a **bilinear form** with metric tensor:
 
-$$S^{ij} = Q^{ia} \, g_{ab} \, K^{jb}$$
+$$S^{ij} = Q^{ia} g_{ab} K^{jb}$$
 
 where $g_{ab} = \frac{1}{\sqrt{d_k}} \delta_{ab}$ is the scaled Euclidean metric.
 
