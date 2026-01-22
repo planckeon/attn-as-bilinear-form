@@ -1,24 +1,21 @@
 """Tests for masking module."""
 
-import pytest
 import jax.numpy as jnp
-import jax.random as random
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import numpy as np
 
 from attn_tensors.masking import (
+    apply_mask,
+    attention_mask_from_padding,
+    block_sparse_mask,
     causal_mask,
     causal_mask_with_window,
-    padding_mask,
-    attention_mask_from_padding,
     causal_padding_mask,
-    local_attention_mask,
-    strided_attention_mask,
-    block_sparse_mask,
     global_local_mask,
-    apply_mask,
+    local_attention_mask,
     mask_to_additive,
+    padding_mask,
+    strided_attention_mask,
     visualize_mask,
 )
 
@@ -26,7 +23,6 @@ from .helpers import (
     assert_allclose,
     assert_shape,
 )
-
 
 # =============================================================================
 # Causal Mask Tests

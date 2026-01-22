@@ -18,9 +18,7 @@ Index conventions:
 import jax.numpy as jnp
 from jax import Array
 
-from .attention import attention_scores, attention_weights, attention_output
 from .softmax import softmax_rows
-
 
 # =============================================================================
 # Multi-Head Attention Core
@@ -73,7 +71,7 @@ def multihead_attention(
     Returns:
         Output of shape (n_q, d_model), optionally with weights
     """
-    H = W_Q.shape[0]
+    W_Q.shape[0]
     d_k = W_Q.shape[2]
 
     # Project Q, K, V for all heads

@@ -1,44 +1,36 @@
 """Tests for softmax.py - Softmax, entropy, and statistical mechanics."""
 
-import pytest
 import jax.numpy as jnp
 import jax.random as random
-import numpy as np
-from hypothesis import given, assume, settings
-from hypothesis import strategies as st
-from hypothesis.extra.numpy import arrays
+import pytest
+from hypothesis import assume, given
 
 from attn_tensors.softmax import (
-    softmax_rows,
-    log_softmax,
-    gibbs_distribution,
-    partition_function,
-    free_energy,
-    entropy,
     attention_entropy,
+    effective_number_of_states,
+    entropy,
+    free_energy,
+    gibbs_distribution,
+    log_softmax,
     max_entropy,
     normalized_entropy,
-    temperature_sweep,
-    effective_number_of_states,
+    partition_function,
     softmax_jacobian,
     softmax_jacobian_batched,
+    softmax_rows,
+    temperature_sweep,
 )
 
 from .helpers import (
-    RTOL,
     ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
     assert_nonnegative,
     assert_probability_distribution,
-    softmax_input,
-    attention_scores_2d,
-    safe_floats,
-    small_floats,
+    assert_shape,
     positive_floats,
+    softmax_input,
 )
-
 
 # =============================================================================
 # Softmax Basic Tests

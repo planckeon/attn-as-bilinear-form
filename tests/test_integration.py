@@ -1,45 +1,38 @@
 """Integration tests - end-to-end tests for the full attention pipeline."""
 
-import pytest
 import jax
 import jax.numpy as jnp
 import jax.random as random
 
 from attn_tensors.attention import (
-    scaled_dot_product_attention,
-    bilinear_attention,
     batched_attention,
+    bilinear_attention,
     decompose_attention,
+    scaled_dot_product_attention,
 )
-from attn_tensors.gradients import verify_gradients, gradient_flow_analysis
-from attn_tensors.multihead import (
-    multihead_attention,
-    multihead_attention_batched,
-    init_multihead_weights,
-    decompose_multihead,
+from attn_tensors.bilinear import scaled_euclidean_metric
+from attn_tensors.gradients import gradient_flow_analysis, verify_gradients
+from attn_tensors.hopfield import (
+    attention_as_hopfield,
+    hopfield_retrieve,
 )
 from attn_tensors.masking import (
     causal_mask,
-    padding_mask,
     causal_padding_mask,
+    padding_mask,
 )
-from attn_tensors.hopfield import (
-    attention_as_hopfield,
-    modern_hopfield_update,
-    hopfield_retrieve,
+from attn_tensors.multihead import (
+    init_multihead_weights,
+    multihead_attention,
+    multihead_attention_batched,
 )
-from attn_tensors.bilinear import scaled_euclidean_metric
-from attn_tensors.softmax import gibbs_distribution, entropy
+from attn_tensors.softmax import entropy
 
 from .helpers import (
-    RTOL,
-    ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
-    assert_probability_distribution,
+    assert_shape,
 )
-
 
 # =============================================================================
 # Full Attention Pipeline Tests

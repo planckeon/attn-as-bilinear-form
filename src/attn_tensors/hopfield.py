@@ -15,8 +15,7 @@ Reference: "Hopfield Networks is All You Need" (arXiv:2008.02217)
 import jax.numpy as jnp
 from jax import Array
 
-from .softmax import gibbs_distribution, free_energy
-
+from .softmax import gibbs_distribution
 
 # =============================================================================
 # Classical Hopfield Networks (for comparison)

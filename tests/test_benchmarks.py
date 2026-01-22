@@ -9,15 +9,14 @@ Or: uv run pytest tests/test_benchmarks.py -v -m benchmark
 When pytest-benchmark is not installed, only the non-benchmark tests will run.
 """
 
-import pytest
 import jax
 import jax.random as random
+import pytest
 
 from attn_tensors.attention import scaled_dot_product_attention
 from attn_tensors.bilinear import bilinear_form_batch, scaled_euclidean_metric
 from attn_tensors.multihead import multihead_attention
 from attn_tensors.softmax import gibbs_distribution
-
 
 # Check if pytest-benchmark is available
 try:

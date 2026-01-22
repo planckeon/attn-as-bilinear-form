@@ -16,7 +16,6 @@ Notation:
 import jax.numpy as jnp
 from jax import Array
 
-
 # =============================================================================
 # Core Softmax Operations
 # =============================================================================
@@ -298,7 +297,7 @@ def softmax_jacobian(probs: Array) -> Array:
     Returns:
         Jacobian matrix of shape (n, n)
     """
-    n = probs.shape[0]
+    probs.shape[0]
     # Outer product: A_j * A_k
     outer = jnp.outer(probs, probs)
     # Diagonal: A_j * delta_{jk}

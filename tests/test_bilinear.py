@@ -1,41 +1,35 @@
 """Tests for bilinear.py - Metric tensors and bilinear forms."""
 
-import pytest
 import jax.numpy as jnp
 import jax.random as random
-import numpy as np
-from hypothesis import given, assume
+import pytest
+from hypothesis import given
 from hypothesis import strategies as st
 
 from attn_tensors.bilinear import (
-    euclidean_metric,
-    scaled_euclidean_metric,
-    learned_metric,
-    diagonal_metric,
-    lower_index,
-    raise_index,
-    metric_inverse,
     bilinear_form,
     bilinear_form_batch,
-    quadratic_form,
+    diagonal_metric,
+    euclidean_metric,
     inner_product,
+    learned_metric,
+    lower_index,
+    metric_inverse,
+    quadratic_form,
+    raise_index,
+    scaled_euclidean_metric,
     verify_metric_properties,
 )
 
 from .helpers import (
-    RTOL,
     ATOL,
     assert_allclose,
-    assert_shape,
-    assert_symmetric,
     assert_positive_definite,
     assert_positive_semidefinite,
-    small_dims,
+    assert_shape,
+    assert_symmetric,
     valid_metric,
-    random_vector,
-    safe_floats,
 )
-
 
 # =============================================================================
 # Euclidean Metric Tests

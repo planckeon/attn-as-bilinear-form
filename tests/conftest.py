@@ -4,9 +4,9 @@ This file is auto-loaded by pytest - use for fixtures only.
 Shared helper functions and strategies are in helpers.py.
 """
 
-import pytest
 import jax.random as random
-from hypothesis import settings, Phase, Verbosity
+import pytest
+from hypothesis import Phase, Verbosity, settings
 
 # =============================================================================
 # Hypothesis Configuration

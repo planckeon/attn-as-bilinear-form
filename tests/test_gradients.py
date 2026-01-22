@@ -1,35 +1,30 @@
 """Tests for gradients module - manual vs autodiff verification."""
 
-import pytest
 import jax
 import jax.numpy as jnp
 import jax.random as random
+import pytest
 from hypothesis import given, settings
-import numpy as np
 
+from attn_tensors.attention import scaled_dot_product_attention
 from attn_tensors.gradients import (
-    grad_scores_wrt_Q,
-    grad_scores_wrt_K,
-    grad_softmax,
+    attention_backward,
     grad_output_wrt_A,
     grad_output_wrt_V,
-    attention_backward,
-    verify_gradients,
+    grad_scores_wrt_K,
+    grad_scores_wrt_Q,
+    grad_softmax,
     gradient_flow_analysis,
     gradient_numerical_check,
+    verify_gradients,
 )
-from attn_tensors.attention import scaled_dot_product_attention
 
 from .helpers import (
-    RTOL,
-    ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
+    assert_shape,
     qkv_tensors,
-    small_floats,
 )
-
 
 # =============================================================================
 # Individual Gradient Component Tests
@@ -41,7 +36,7 @@ class TestGradScoresWrtQ:
 
     def test_basic_shape(self, sample_qkv):
         """Gradient should have same shape as Q."""
-        Q, K = sample_qkv["Q"], sample_qkv["K"]
+        _Q, K = sample_qkv["Q"], sample_qkv["K"]
         n_q, n_k, d = sample_qkv["n_q"], sample_qkv["n_k"], sample_qkv["d"]
 
         dL_dS = jnp.ones((n_q, n_k))
@@ -91,7 +86,7 @@ class TestGradScoresWrtK:
 
     def test_basic_shape(self, sample_qkv):
         """Gradient should have same shape as K."""
-        Q, K = sample_qkv["Q"], sample_qkv["K"]
+        Q, _K = sample_qkv["Q"], sample_qkv["K"]
         n_q, n_k, d = sample_qkv["n_q"], sample_qkv["n_k"], sample_qkv["d"]
 
         dL_dS = jnp.ones((n_q, n_k))

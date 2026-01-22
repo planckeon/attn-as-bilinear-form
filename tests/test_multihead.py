@@ -1,31 +1,25 @@
 """Tests for multihead attention module."""
 
-import pytest
 import jax
 import jax.numpy as jnp
 import jax.random as random
-from hypothesis import given, settings
-import numpy as np
+import pytest
 
 from attn_tensors.multihead import (
+    decompose_multihead,
+    head_attention_entropy,
+    head_diversity,
+    init_multihead_weights,
     multihead_attention,
     multihead_attention_batched,
-    init_multihead_weights,
-    head_diversity,
-    head_attention_entropy,
-    decompose_multihead,
 )
-from attn_tensors.attention import scaled_dot_product_attention
 
 from .helpers import (
-    RTOL,
-    ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
     assert_probability_distribution,
+    assert_shape,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -148,7 +142,7 @@ class TestMultiheadAttention:
         """Single-head attention should match standard attention (up to projection)."""
         keys = random.split(rng_key, 5)
         d_model = 16
-        n_q, n_k = 4, 6
+        n_q, _n_k = 4, 6
 
         # Single head with identity-like projections
         W_Q = random.normal(keys[0], (1, d_model, d_model)) * 0.1

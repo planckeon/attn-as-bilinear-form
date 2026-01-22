@@ -1,37 +1,29 @@
 """Tests for attention module."""
 
-import pytest
 import jax
 import jax.numpy as jnp
 import jax.random as random
 from hypothesis import given, settings
-import numpy as np
 
 from attn_tensors.attention import (
+    attention_output,
     attention_scores,
     attention_scores_with_metric,
     attention_weights,
-    attention_output,
-    scaled_dot_product_attention,
-    bilinear_attention,
     batched_attention,
+    bilinear_attention,
     decompose_attention,
+    scaled_dot_product_attention,
 )
 from attn_tensors.bilinear import scaled_euclidean_metric
 
 from .helpers import (
-    RTOL,
-    ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
     assert_probability_distribution,
-    assert_nonnegative,
+    assert_shape,
     qkv_tensors,
-    valid_metric,
-    positive_floats,
 )
-
 
 # =============================================================================
 # Attention Scores Tests
@@ -230,7 +222,6 @@ class TestAttentionOutput:
     def test_one_hot_weights_select_value(self, rng_key):
         """One-hot attention weights should select corresponding value."""
         V = random.normal(rng_key, (5, 8))
-        n_q = 3
 
         # One-hot weights
         A = jnp.array(

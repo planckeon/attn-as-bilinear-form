@@ -16,11 +16,10 @@ Index conventions:
     k, l: general indices in gradient expressions
 """
 
+
 import jax
 import jax.numpy as jnp
 from jax import Array
-from functools import partial
-
 
 # =============================================================================
 # Score Gradients: dL/dQ, dL/dK from dL/dS
@@ -376,7 +375,6 @@ def gradient_flow_analysis(
     Returns:
         Dictionary with gradient tensors and statistics
     """
-    from .attention import scaled_dot_product_attention
 
     d_k = Q.shape[-1]
     scale = 1.0 / jnp.sqrt(d_k)

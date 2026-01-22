@@ -9,27 +9,26 @@ These tests verify that visualization functions:
 Note: We use matplotlib's Agg backend to avoid display issues in CI.
 """
 
-import pytest
 import matplotlib
+import pytest
 
 matplotlib.use("Agg")  # Non-interactive backend for testing
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure, SubFigure
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
 from jax import random
+from matplotlib.figure import Figure, SubFigure
 
-from attn_tensors.utils import (
-    plot_attention_weights,
-    plot_multihead_attention,
-    plot_entropy_distribution,
-    plot_temperature_sweep,
-    plot_gradient_flow,
-    plot_mask,
-    plot_hopfield_energy,
-    compare_metrics,
-)
 from attn_tensors.bilinear import euclidean_metric, scaled_euclidean_metric
-
+from attn_tensors.utils import (
+    compare_metrics,
+    plot_attention_weights,
+    plot_entropy_distribution,
+    plot_gradient_flow,
+    plot_hopfield_energy,
+    plot_mask,
+    plot_multihead_attention,
+    plot_temperature_sweep,
+)
 
 # =============================================================================
 # Fixtures

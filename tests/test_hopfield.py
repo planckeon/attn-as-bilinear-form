@@ -1,36 +1,30 @@
 """Tests for Hopfield network module."""
 
-import pytest
 import jax
 import jax.numpy as jnp
 import jax.random as random
-from hypothesis import given, settings
-from hypothesis import strategies as st
 import numpy as np
+import pytest
 
 from attn_tensors.hopfield import (
-    classical_hopfield_energy,
-    classical_hopfield_update,
-    modern_hopfield_energy,
-    modern_hopfield_update,
-    hopfield_retrieve,
     attention_as_hopfield,
     classical_capacity,
-    modern_capacity,
-    separation_quality,
+    classical_hopfield_energy,
+    classical_hopfield_update,
     energy_landscape_1d,
+    hopfield_retrieve,
+    modern_capacity,
+    modern_hopfield_energy,
+    modern_hopfield_update,
     retrieval_basin,
+    separation_quality,
 )
 
 from .helpers import (
-    RTOL,
-    ATOL,
     assert_allclose,
-    assert_shape,
     assert_finite,
-    positive_floats,
+    assert_shape,
 )
-
 
 # =============================================================================
 # Fixtures

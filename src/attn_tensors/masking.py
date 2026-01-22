@@ -14,7 +14,6 @@ Mask convention:
 import jax.numpy as jnp
 from jax import Array
 
-
 # =============================================================================
 # Causal Masks (Autoregressive)
 # =============================================================================

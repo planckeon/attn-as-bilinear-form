@@ -47,6 +47,10 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
+ignore = [
+    "E741",  # Ambiguous variable name (we use O for output tensors per physics notation)
+    "E402",  # Module level import not at top (needed for circular import avoidance)
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

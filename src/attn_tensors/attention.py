@@ -14,9 +14,8 @@ Index conventions:
 import jax.numpy as jnp
 from jax import Array
 
-from .bilinear import scaled_euclidean_metric, bilinear_form_batch
-from .softmax import softmax_rows, gibbs_distribution
-
+from .bilinear import bilinear_form_batch
+from .softmax import gibbs_distribution, softmax_rows
 
 # =============================================================================
 # Core Attention Operations

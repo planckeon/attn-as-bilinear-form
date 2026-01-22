@@ -8,13 +8,13 @@ Provides functions for:
 - Comparative plots
 """
 
-import jax.numpy as jnp
-from jax import Array
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-from matplotlib.figure import Figure, SubFigure
 from typing import Sequence
 
+import jax.numpy as jnp
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+from jax import Array
+from matplotlib.figure import Figure, SubFigure
 
 # =============================================================================
 # Attention Visualization
@@ -186,7 +186,7 @@ def plot_temperature_sweep(
     Returns:
         Matplotlib figure
     """
-    from .softmax import temperature_sweep, entropy
+    from .softmax import entropy, temperature_sweep
 
     if temperatures is None:
         temperatures = jnp.array([0.1, 0.5, 1.0, 2.0, 5.0])
