@@ -84,3 +84,6 @@ pip-log.txt
 # Uncomment if you want to ignore PDF:
 # *.pdf
 .hypothesis/
+
+# Zola
+site/public/

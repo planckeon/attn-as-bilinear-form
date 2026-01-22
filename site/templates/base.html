@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    <meta name="description" content="{{ config.description }}">
+    
+    <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+    
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{{ get_url(path='/') }}" class="logo">
+                <span class="logo-icon">∑</span>
+                <span class="logo-text">{{ config.title }}</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ config.extra.github_repo }}" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock content %}
+    </main>
+
+    <footer>
+        <p>Built with <a href="https://www.getzola.org/" target="_blank" rel="noopener">Zola</a> · 
+           <a href="{{ config.extra.github_repo }}" target="_blank" rel="noopener">Source on GitHub</a></p>
+    </footer>
+</body>
+</html>

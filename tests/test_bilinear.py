@@ -451,6 +451,81 @@ class TestVerifyMetricProperties:
 
 
 # =============================================================================
+# Inner Product Tests
+# =============================================================================
+
+
+class TestInnerProduct:
+    """Tests for inner_product convenience function."""
+
+    def test_euclidean_mode(self, rng_key):
+        """Euclidean inner product should equal dot product."""
+        keys = random.split(rng_key, 2)
+        u = random.normal(keys[0], (8,))
+        v = random.normal(keys[1], (8,))
+
+        result = inner_product(u, v, metric_type="euclidean")
+        expected = jnp.dot(u, v)
+        assert_allclose(result, expected)
+
+    def test_scaled_mode(self, rng_key):
+        """Scaled inner product should equal dot product / sqrt(d)."""
+        keys = random.split(rng_key, 2)
+        d = 8
+        u = random.normal(keys[0], (d,))
+        v = random.normal(keys[1], (d,))
+
+        result = inner_product(u, v, metric_type="scaled")
+        expected = jnp.dot(u, v) / jnp.sqrt(d)
+        assert_allclose(result, expected)
+
+    def test_default_is_scaled(self, rng_key):
+        """Default metric_type should be 'scaled'."""
+        keys = random.split(rng_key, 2)
+        u = random.normal(keys[0], (8,))
+        v = random.normal(keys[1], (8,))
+
+        result_default = inner_product(u, v)
+        result_scaled = inner_product(u, v, metric_type="scaled")
+        assert_allclose(result_default, result_scaled)
+
+    def test_symmetry(self, rng_key):
+        """Inner product should be symmetric."""
+        keys = random.split(rng_key, 2)
+        u = random.normal(keys[0], (8,))
+        v = random.normal(keys[1], (8,))
+
+        result_uv = inner_product(u, v)
+        result_vu = inner_product(v, u)
+        assert_allclose(result_uv, result_vu)
+
+    def test_bilinearity(self, rng_key):
+        """Inner product should be bilinear."""
+        keys = random.split(rng_key, 3)
+        u = random.normal(keys[0], (8,))
+        v = random.normal(keys[1], (8,))
+        w = random.normal(keys[2], (8,))
+        a, b = 2.5, 1.5
+
+        # Linearity in first argument
+        lhs = inner_product(a * u + b * v, w)
+        rhs = a * inner_product(u, w) + b * inner_product(v, w)
+        assert_allclose(lhs, rhs, err_msg="Not linear in first arg")
+
+    def test_different_dimensions(self):
+        """Should work for various dimensions."""
+        for d in [1, 2, 4, 8, 16, 32]:
+            u = jnp.ones(d)
+            v = jnp.ones(d)
+
+            result_euc = inner_product(u, v, metric_type="euclidean")
+            result_scaled = inner_product(u, v, metric_type="scaled")
+
+            assert_allclose(result_euc, float(d))
+            assert_allclose(result_scaled, float(d) / jnp.sqrt(d))
+
+
+# =============================================================================
 # Edge Cases
 # =============================================================================
 

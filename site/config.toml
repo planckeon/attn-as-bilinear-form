@@ -1,0 +1,25 @@
+# Zola configuration for Attention as Bilinear Form site
+base_url = "https://bkataru-workshop.github.io/attn-as-bilinear-form"
+title = "Attention as Bilinear Form"
+description = "A Physicist's Guide to Transformer Attention"
+compile_sass = true
+minify_html = true
+generate_feeds = false
+build_search_index = true
+
+[markdown]
+highlight_code = true
+highlight_theme = "one-dark"
+extra_syntaxes_and_themes = []
+smart_punctuation = true
+
+[extra]
+author = "bkataru-workshop"
+github_repo = "https://github.com/bkataru-workshop/attn-as-bilinear-form"
+math = true
+
+[search]
+include_title = true
+include_description = true
+include_path = true
+include_content = true
