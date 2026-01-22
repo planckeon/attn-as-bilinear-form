@@ -136,7 +136,7 @@
 ]
 
 #par(justify: true)[
-We present a rigorous formulation of the transformer attention mechanism using the language of tensor calculus, differential geometry, and statistical mechanics. The standard attention operation $"Attention"(Q, K, V) = "softmax"(Q K^T \/ sqrt(d_k)) V$ conceals rich mathematical structure: the score computation is a bilinear form with an implicit metric tensor, the softmax normalization is the Gibbs distribution from thermodynamics, and the entire mechanism implements a modern Hopfield network with exponential storage capacity. We provide complete derivations in index notation with Einstein summation convention, explicit gradient computations verified against automatic differentiation, and connections to Riemannian geometry through the Fisher information metric. A companion Python library `attn-tensors` implements all operations with JAX, achieving machine-precision agreement between manual gradients and autodiff. The geometric perspective reveals natural generalizations including learned metrics, temperature-controlled attention, and efficient approximations. Code and documentation are publicly available at #link("https://github.com/bkataru-workshop/attn-as-bilinear-form").
+We present a rigorous formulation of the transformer attention mechanism using the language of tensor calculus, differential geometry, and statistical mechanics. The standard attention operation $"Attention"(Q, K, V) = "softmax"(Q K^T \/ sqrt(d_k)) V$ conceals rich mathematical structure: the score computation is a bilinear form with an implicit metric tensor, the softmax normalization is the Gibbs distribution from thermodynamics, and the entire mechanism implements a modern Hopfield network with exponential storage capacity. We provide complete derivations in index notation with Einstein summation convention, explicit gradient computations verified against automatic differentiation, and connections to Riemannian geometry through the Fisher information metric. A companion Python library `attn-tensors` implements all operations with JAX, achieving machine-precision agreement between manual gradients and autodiff. The geometric perspective reveals natural generalizations including learned metrics, temperature-controlled attention, and efficient approximations. Code and documentation are publicly available at #link("https://github.com/planckeon/attn-as-bilinear-form").
 ]
 
 #v(1em)
@@ -1026,15 +1026,15 @@ We thank the JAX and MLX development teams for their excellent automatic differe
 
 Full source code, documentation, and examples:
 
-- *GitHub*: https://github.com/bkataru-workshop/attn-as-bilinear-form
-- *Documentation*: https://bkataru-workshop.github.io/attn-as-bilinear-form/
+- *GitHub*: https://github.com/planckeon/attn-as-bilinear-form
+- *Documentation*: https://planckeon.github.io/attn-as-bilinear-form/
 - *License*: MIT
 
 == Quick Start
 
 ```bash
 # Install
-git clone https://github.com/bkataru-workshop/attn-as-bilinear-form
+git clone https://github.com/planckeon/attn-as-bilinear-form
 cd attn-as-bilinear-form
 uv sync
 

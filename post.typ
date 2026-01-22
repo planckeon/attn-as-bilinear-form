@@ -157,7 +157,7 @@ The punchline? That innocent-looking formula $"Attention"(Q, K, V) = "softmax"(Q
 ]
 
 #block[
-A companion Python library `attn-tensors` implements everything we discuss, with 400+ tests verifying our gradient derivations against JAX autodiff. Code at: #link("https://github.com/bkataru-workshop/attn-as-bilinear-form").
+A companion Python library `attn-tensors` implements everything we discuss, with 400+ tests verifying our gradient derivations against JAX autodiff. Code at: #link("https://github.com/planckeon/attn-as-bilinear-form").
 ]
 
 #v(1em)
@@ -1154,7 +1154,7 @@ attn_tensors/
 
 ```bash
 # Install
-git clone https://github.com/bkataru-workshop/attn-as-bilinear-form
+git clone https://github.com/planckeon/attn-as-bilinear-form
 cd attn-as-bilinear-form
 uv sync
 
@@ -1210,8 +1210,8 @@ For those who want to dive deeper:
 - Kardar, "Statistical Physics of Fields" - Statistical mechanics
 
 *Code and Documentation:*
-- GitHub: https://github.com/bkataru-workshop/attn-as-bilinear-form
-- Documentation: https://bkataru-workshop.github.io/attn-as-bilinear-form/
+- GitHub: https://github.com/planckeon/attn-as-bilinear-form
+- Documentation: https://planckeon.github.io/attn-as-bilinear-form/
 
 *Einsum Resources:*
 - Sankalp, "Shape Rotation 101: An Intro to Einsum and Jax Transformers" - Excellent practical einsum tutorial

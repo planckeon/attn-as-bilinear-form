@@ -17,7 +17,7 @@ The punchline? That innocent-looking formula `Attention(Q, K, V) = softmax(QK^T 
 
 A companion Python library `attn-tensors` implements everything we discuss, with 400+ tests verifying our gradient derivations against JAX autodiff.
 
-**Code**: [github.com/bkataru-workshop/attn-as-bilinear-form](https://github.com/bkataru-workshop/attn-as-bilinear-form)
+**Code**: [github.com/planckeon/attn-as-bilinear-form](https://github.com/planckeon/attn-as-bilinear-form)
 
 ---
 
@@ -534,7 +534,7 @@ All derivations verified against JAX autodiff. 400+ tests.
 ### Quick Start
 
 ```bash
-git clone https://github.com/bkataru-workshop/attn-as-bilinear-form
+git clone https://github.com/planckeon/attn-as-bilinear-form
 cd attn-as-bilinear-form
 uv sync
 
@@ -572,8 +572,8 @@ print(results)  # {'dL_dQ': True, 'dL_dK': True, 'dL_dV': True, 'all_correct': T
 
 ---
 
-**GitHub**: [github.com/bkataru-workshop/attn-as-bilinear-form](https://github.com/bkataru-workshop/attn-as-bilinear-form)
+**GitHub**: [github.com/planckeon/attn-as-bilinear-form](https://github.com/planckeon/attn-as-bilinear-form)
 
-**Documentation**: [bkataru-workshop.github.io/attn-as-bilinear-form](https://bkataru-workshop.github.io/attn-as-bilinear-form/)
+**Documentation**: [planckeon.github.io/attn-as-bilinear-form](https://planckeon.github.io/attn-as-bilinear-form/)
 
 **License**: MIT
