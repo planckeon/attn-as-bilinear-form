@@ -1,5 +1,5 @@
 # Zola configuration for Attention as Bilinear Form site
-base_url = "https://bkataru-workshop.github.io/attn-as-bilinear-form"
+base_url = "https://planckeon.github.io/attn-as-bilinear-form"
 title = "Attention as Bilinear Form"
 description = "A Physicist's Guide to Transformer Attention"
 compile_sass = true
@@ -14,8 +14,8 @@ extra_syntaxes_and_themes = []
 smart_punctuation = true
 
 [extra]
-author = "bkataru-workshop"
-github_repo = "https://github.com/bkataru-workshop/attn-as-bilinear-form"
+author = "planckeon labs"
+github_repo = "https://github.com/planckeon/attn-as-bilinear-form"
 math = true
 
 [search]
