@@ -409,52 +409,52 @@ class TestLatexLinterValidators:
     def test_is_valid_subscript_single_letter(self):
         """Test that single letters are valid subscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('i') == True
-        assert linter._is_valid_subscript('j') == True
-        assert linter._is_valid_subscript('a') == True
+        assert linter._is_valid_subscript('i')
+        assert linter._is_valid_subscript('j')
+        assert linter._is_valid_subscript('a')
 
     def test_is_valid_subscript_tensor_notation(self):
         """Test that tensor notation is valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('ab') == True
-        assert linter._is_valid_subscript('ij') == True
-        assert linter._is_valid_subscript('hia') == True
-        assert linter._is_valid_subscript('abc') == True
+        assert linter._is_valid_subscript('ab')
+        assert linter._is_valid_subscript('ij')
+        assert linter._is_valid_subscript('hia')
+        assert linter._is_valid_subscript('abc')
 
     def test_is_valid_subscript_math_operators(self):
         """Test that math operators are valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('min') == True
-        assert linter._is_valid_subscript('max') == True
-        assert linter._is_valid_subscript('log') == True
-        assert linter._is_valid_subscript('sin') == True
+        assert linter._is_valid_subscript('min')
+        assert linter._is_valid_subscript('max')
+        assert linter._is_valid_subscript('log')
+        assert linter._is_valid_subscript('sin')
 
     def test_is_valid_subscript_dimension_names(self):
         """Test that dimension names are valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('model') == True
+        assert linter._is_valid_subscript('model')
 
     def test_is_valid_subscript_invalid_words(self):
         """Test that multi-letter words with caps are invalid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('ERROR') == False
-        assert linter._is_valid_subscript('QKV') == False
-        assert linter._is_valid_subscript('Input') == False
+        assert not linter._is_valid_subscript('ERROR')
+        assert not linter._is_valid_subscript('QKV')
+        assert not linter._is_valid_subscript('Input')
 
     def test_is_valid_superscript_single_letter(self):
         """Test that single letters are valid superscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_superscript('i') == True
-        assert linter._is_valid_superscript('a') == True
+        assert linter._is_valid_superscript('i')
+        assert linter._is_valid_superscript('a')
 
     def test_is_valid_superscript_tensor_notation(self):
         """Test that tensor notation is valid for superscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_superscript('ia') == True
-        assert linter._is_valid_superscript('hia') == True
+        assert linter._is_valid_superscript('ia')
+        assert linter._is_valid_superscript('hia')
 
     def test_is_valid_superscript_invalid(self):
         """Test that capitalized words are invalid superscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_superscript('ERROR') == False
-        assert linter._is_valid_superscript('NEW') == False
+        assert not linter._is_valid_superscript('ERROR')
+        assert not linter._is_valid_superscript('NEW')
