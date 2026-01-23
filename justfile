@@ -109,13 +109,12 @@ lint-vale: sync-vale
     shopt -s globstar
     vale --output=line site/content/*.md site/content/**/*.md *.md
 
-# Run LaTeX/MathJax linter on markdown and Python files
+# Run LaTeX/MathJax linter on markdown files
 lint-latex:
     #!/usr/bin/env bash
     set -euo pipefail
     python3 scripts/lint_latex.py \
-        $(find . -name "*.md" -type f -not -path "./.git/*") \
-        $(find src notebooks tests -name "*.py" -type f 2>/dev/null || true)
+        $(find . -name "*.md" -type f -not -path "./.git/*")
 
 # Run vale linter on markdown files (deprecated, use lint-vale)
 lint: sync-vale

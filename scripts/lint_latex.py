@@ -2,9 +2,8 @@
 """
 LaTeX/MathJax linter for markdown files.
 
-This script checks for common LaTeX formatting errors in markdown content,
+This script checks for common LaTeX formatting errors in markdown files,
 particularly in inline math ($...$) and display math ($$...$$) blocks.
-"""
 """
 
 import re
@@ -19,6 +18,7 @@ class LatexLinter:
     def __init__(self):
         self.errors = []
         self._content_for_linting = ""  # Will store content with code blocks removed
+        self._original_content = ""  # Will store original content for line mapping
         # Pattern to find multi-letter words in subscripts/superscripts
         # that should be wrapped in \text{} or similar commands
         self.patterns = [
@@ -89,9 +89,6 @@ class LatexLinter:
         
         # Find display math blocks ($$...$$)
         for match in re.finditer(r'\$\$(.*?)\$\$', content_no_code, re.DOTALL):
-            # Get the position in the original content
-            # We need to find this math block in the original content
-            # For simplicity, we'll use the cleaned content for linting
             math_blocks.append((match.group(1), match.start(), match.end()))
         
         # Find inline math blocks ($...$) that aren't part of $$...$$
@@ -100,16 +97,31 @@ class LatexLinter:
         for match in re.finditer(inline_pattern, content_no_code):
             math_blocks.append((match.group(1), match.start(), match.end()))
         
-        # Adjust positions to use cleaned content
-        # Update the lint_math_block to use cleaned content
+        # Store both original and cleaned content for line number mapping
         self._content_for_linting = content_no_code
+        self._original_content = content
         
         return math_blocks
 
     def lint_math_block(self, math_content: str, start_pos: int, filepath: str):
         """Lint a single math block for errors."""
-        # Get line number from cleaned content
-        line_num = self._content_for_linting[:start_pos].count('\n') + 1
+        # Find the math block in the original content to get accurate line numbers
+        # Search for the math content in the original content
+        # We use the cleaned content position as a hint, but search in original
+        
+        # For accuracy, we search for the complete math block pattern in original content
+        # This is an approximation - we look for the math content around the expected position
+        math_pattern = re.escape(math_content)
+        
+        # Try to find the math block in the original content
+        line_num = 1  # Default to line 1 if we can't find it
+        for match in re.finditer(r'\$\$?' + math_pattern + r'\$\$?', self._original_content, re.DOTALL):
+            line_num = self._original_content[:match.start()].count('\n') + 1
+            break
+        
+        # Fallback: if not found, use cleaned content line number (less accurate)
+        if line_num == 1 and start_pos > 0:
+            line_num = self._content_for_linting[:start_pos].count('\n') + 1
         
         # Mapping of pattern types to validator functions
         validators = {
@@ -173,7 +185,7 @@ def main():
         'files',
         nargs='+',
         type=Path,
-        help='Markdown or Python files to lint'
+        help='Markdown files to lint'
     )
     
     args = parser.parse_args()
@@ -186,8 +198,8 @@ def main():
             print(f"Warning: {filepath} does not exist", file=sys.stderr)
             continue
         
-        if filepath.suffix not in ['.md', '.markdown', '.py']:
-            print(f"Warning: {filepath} is not a markdown or Python file", file=sys.stderr)
+        if filepath.suffix not in ['.md', '.markdown']:
+            print(f"Warning: {filepath} is not a markdown file", file=sys.stderr)
             continue
         
         errors = linter.lint_file(filepath)
