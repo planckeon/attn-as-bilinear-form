@@ -93,3 +93,6 @@ site/public/
 
 # Vale binary (downloaded for linting)
 vale
+
+# Just binary (for testing)
+just
