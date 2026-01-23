@@ -259,6 +259,6 @@ where $H(A)$ is the entropy of attention patterns.
 
 The softmax minimizes KL divergence to a uniform prior:
 
-$$A^* = \arg\min_A \left[ -\sum_j A^{ij} S^{ij} + \frac{1}{\beta} D_{KL}(A \| U) \right]$$
+$$A^* = \arg\min_A \left[ -\sum_j A^{ij} S^{ij} + \frac{1}{\beta} D_{\text{KL}}(A \| U) \right]$$
 
 where $U$ is the uniform distribution.

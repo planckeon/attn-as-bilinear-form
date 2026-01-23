@@ -27,7 +27,7 @@ $$PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d}}\right)$$
 
 Simply learn a lookup table:
 
-$$X^{ia}_{input} = X^{ia}_{token} + P^{ia}$$
+$$X^{ia}_{\text{input}} = X^{ia}_{\text{token}} + P^{ia}$$
 
 where $P \in \mathbb{R}^{L_{max} \times d}$ is learned.
 

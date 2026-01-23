@@ -103,6 +103,19 @@ sync-vale: install-vale
     vale sync
 
 # Run vale linter on markdown files
+lint-vale: sync-vale
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s globstar
+    vale --output=line site/content/*.md site/content/**/*.md *.md
+
+# Run LaTeX/MathJax linter on markdown files
+lint-latex:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 scripts/lint_latex.py $(find . -name "*.md" -type f -not -path "./.git/*")
+
+# Run vale linter on markdown files (deprecated, use lint-vale)
 lint: sync-vale
     #!/usr/bin/env bash
     set -euo pipefail
@@ -115,4 +128,4 @@ clean-vale:
     rm -rf .vale/styles/
 
 # Run all linters
-lint-all: lint
+lint-all: lint-vale lint-latex

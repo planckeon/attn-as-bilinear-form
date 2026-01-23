@@ -155,9 +155,9 @@ Q = split_heads(X, num_heads)  # (2, 8, 10, 8)
 
 Instead of separate $W_Q, W_K, W_V$, use a single fused projection:
 
-$$[Q; K; V] = X W_{QKV}$$
+$$[Q; K; V] = X W_{\text{QKV}}$$
 
-where $W_{QKV}$ has shape $d_{model} \times 3d_{model}$.
+where $W_{\text{QKV}}$ has shape $d_{model} \times 3d_{model}$.
 
 ### Memory Layout
 
