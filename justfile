@@ -37,6 +37,9 @@ sync-vale: install-vale
 
 # Run vale linter on markdown files
 lint: sync-vale
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s globstar
     vale --output=line site/content/*.md site/content/**/*.md *.md
 
 # Clean up vale binary and styles
