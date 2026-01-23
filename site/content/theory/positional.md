@@ -5,9 +5,9 @@ weight = 6
 
 ## Why Positional Information?
 
-Attention is permutation-equivariant: swapping input positions swaps outputs identically. But language has order. "Dog bites man" ≠ "Man bites dog."
+Attention is permutation-equivariant: swapping input positions swaps outputs identically. But language has order! "Dog bites man" ≠ "Man bites dog".
 
-Positional information needs injection.
+We need to inject positional information.
 
 ## Absolute Positional Encodings
 
@@ -39,7 +39,7 @@ where $P \in \mathbb{R}^{L_{max} \times d}$ is learned.
 
 ### The Problem with Absolute
 
-Absolute encodings conflate content with position. The model must learn that "word at position 5" attending to "word at position 3" is like "position 10 attending to position 8."
+Absolute encodings conflate content with position. The model must learn that "word at position 5" attending to "word at position 3" is similar to "position 10 attending to position 8".
 
 Relative encodings directly encode the offset.
 
@@ -51,7 +51,7 @@ $$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja} + b_{i-j}$$
 
 where $b_k$ is a learned bias for relative position $k$.
 
-**Bucketing**: t5 uses logarithmic bucketing for large offsets:
+**Bucketing:** T5 uses logarithmic bucketing for large offsets:
 - Exact positions for $|k| \leq 8$
 - Bucketed for larger offsets
 
@@ -62,8 +62,8 @@ Decompose attention into content and position terms:
 $$S^{ij} = \underbrace{Q^{ia} K^{ja}}_{\text{content-content}} + \underbrace{Q^{ia} R^{(i-j)a}}_{\text{content-position}} + \underbrace{u^a K^{ja}}_{\text{global content}} + \underbrace{v^a R^{(i-j)a}}_{\text{global position}}$$
 
 where:
-- $R^{ka}$: relative position embeddings
-- $u^a, v^a$: learned global query vectors
+- $R^{ka}$: Relative position embeddings
+- $u^a, v^a$: Learned global query vectors
 
 ### ALiBi (Attention with Linear Biases)
 
@@ -73,16 +73,16 @@ $$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja} - m \cdot |i - j|$$
 
 where $m$ is a head-specific slope.
 
-**Key insight**: no learned positional parameters—just a linear penalty for distance.
+**Key insight:** No learned positional parameters! Just a linear penalty for distance.
 
-**Slopes**: different heads use different slopes: $m_h = 2^{-8 h/H}$
+**Slopes:** Different heads use different slopes: $m_h = 2^{-8h/H}$
 
 | Head | Slope | Effect |
 |------|-------|--------|
-| 1 | Large | Local attention |
+| 1 | Large | Very local attention |
 | H | Small | Global attention |
 
-**Extrapolation**: alibi extrapolates well to longer sequences than trained on.
+**Extrapolation:** ALiBi extrapolates well to longer sequences than trained on.
 
 ## Rotary Position Embeddings (RoPE)
 
@@ -90,7 +90,7 @@ where $m$ is a head-specific slope.
 
 Su et al. (2021): Encode position by rotating the query/key vectors.
 
-For position $m$, rotate by angle $m\theta\colon$
+For position $m$, rotate by angle $m\theta$:
 
 $$f(x, m) = R_m x$$
 
@@ -144,7 +144,7 @@ $$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} R^{ab}(j-i) K^{jb}$$
 
 ### Efficient Implementation
 
-No explicit matrix multiplication needed. Use:
+No explicit matrix multiplication needed! Use:
 
 $$\tilde{q} = q \odot \cos(m\theta) + \text{rotate\_half}(q) \odot \sin(m\theta)$$
 
@@ -168,7 +168,7 @@ The rotation is its own transpose (orthogonal), so gradients just rotate back.
 | Sinusoidal | No | Moderate | No | O(L·d) |
 | Learned | Yes | Poor | No | O(L·d) |
 | T5 Bias | Yes | Moderate | Yes | O(L²) |
-| ALiBi | No | Good extrapolation | Yes | O(1) |
+| ALiBi | No | Excellent | Yes | O(1) |
 | RoPE | No | Good | Yes | O(L·d) |
 
 ## Code Example

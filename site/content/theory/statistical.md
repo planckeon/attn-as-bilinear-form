@@ -48,8 +48,8 @@ The **entropy** measures attention concentration:
 $$H^i = -\sum_j A^{ij} \log A^{ij}$$
 
 Properties:
-- **Max entropy** ($H = \log n_k$): uniform attention
-- **Min entropy** ($H = 0$): hard attention on single key
+- **Maximum entropy** ($H = \log n_k$): Uniform attention
+- **Minimum entropy** ($H = 0$): Hard attention on single key
 - Lower entropy = more focused attention
 
 ## Free Energy
@@ -66,7 +66,7 @@ Ramsauer et al. (2020) showed attention implements a **Hopfield network** update
 
 $$\xi^{\text{new}} = V^T \text{softmax}(\beta K \xi)$$
 
-The stored patterns are the rows of $K$. Attention retrieves the pattern most like the query.
+The stored patterns are the rows of $K$. Attention retrieves the pattern most similar to the query.
 
 ### Storage Capacity
 
@@ -138,13 +138,13 @@ where $\langle E \rangle = -\sum_j A^{ij} S^{ij}$ is the expected energy and $H^
 
 ### Variational Principle
 
-The attention weights reduce:
+The attention weights minimize:
 
 $$A^* = \arg\min_A \left[ \langle E \rangle - \frac{1}{\beta} H(A) \right]$$
 
 subject to $\sum_j A^{ij} = 1$ and $A^{ij} \geq 0$.
 
-This equals softmax.
+This is equivalent to softmax!
 
 ## Deep Dive: Hopfield Networks
 
@@ -174,7 +174,7 @@ where $\text{lse}(x) = \log \sum_i e^{x_i}$ is the log-sum-exp.
 
 $$\xi^{new} = K^T \text{softmax}(\beta K \xi)$$
 
-This is exactly attention. The query $\xi$ updates to be a weighted combination of stored patterns (rows of $K$).
+This is exactly attention! The query $\xi$ is updated to be a weighted combination of stored patterns (rows of $K$).
 
 ### Why Exponential Capacity?
 
@@ -189,7 +189,7 @@ e^{-\beta \Delta} & x_i = \max(x) - \Delta
 
 For large $\beta$, even small separation $\Delta$ gives clean retrieval.
 
-**Capacity**: $\sim \exp(d/2)$ patterns in $d$ dimensions
+**Capacity:** $\sim \exp(d/2)$ patterns in $d$ dimensions!
 
 ### Attention as Associative Memory
 
@@ -203,29 +203,29 @@ For large $\beta$, even small separation $\Delta$ gives clean retrieval.
 
 ## Worked Example: Pattern Retrieval
 
-**Setup**: store 3 patterns as keys, retrieve closest to query.
+**Setup:** Store 3 patterns as keys, retrieve closest to query.
 
 $$K = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 0.7 & 0.7 \end{pmatrix}, \quad q = \begin{pmatrix} 0.9 \\ 0.1 \end{pmatrix}$$
 
-**Step 1: compute scores**
+**Step 1: Compute scores**
 
 $$s = K q = \begin{pmatrix} 0.9 \\ 0.1 \\ 0.7 \end{pmatrix}$$
 
-**Step 2: apply softmax** (with $\beta = 1$)
+**Step 2: Apply softmax** (with $\beta = 1$)
 
 $$a = \text{softmax}(s) \approx \begin{pmatrix} 0.48 \\ 0.22 \\ 0.30 \end{pmatrix}$$
 
-**Step 3: retrieve pattern**
+**Step 3: Retrieve pattern**
 
 $$\xi^{new} = K^T a = \begin{pmatrix} 0.48 + 0.21 \\ 0.22 + 0.21 \end{pmatrix} = \begin{pmatrix} 0.69 \\ 0.43 \end{pmatrix}$$
 
-The query moved toward pattern 1 (closest).
+The query moved toward pattern 1 (which it was closest to).
 
-**With high temperature** ($\beta = 5$ s):
+**With high temperature** ($\beta = 5$):
 
 $$a = \text{softmax}(5s) \approx \begin{pmatrix} 0.88 \\ 0.01 \\ 0.11 \end{pmatrix}$$
 
-Now retrieval is sharper—close to pure pattern 1.
+Now retrieval is sharper—almost pure pattern 1.
 
 ## Thermodynamic Quantities
 
@@ -235,7 +235,7 @@ The heat capacity measures sensitivity to temperature:
 
 $$C = \frac{\partial \langle E \rangle}{\partial T} = \beta^2 \text{Var}(E)$$
 
-High heat capacity near phase transitions—when attention chooses between keys.
+High heat capacity near phase transitions—when attention is "deciding" between multiple keys.
 
 ### Susceptibility
 
@@ -243,7 +243,7 @@ Response to perturbation in scores:
 
 $$\chi^{ij}_{kl} = \frac{\partial A^{ij}}{\partial S^{kl}}$$
 
-This is exactly the softmax Jacobian derived for gradients.
+This is exactly the softmax Jacobian we derived for gradients!
 
 ## Connection to Information Theory
 

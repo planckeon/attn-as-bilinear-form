@@ -8,14 +8,14 @@
 
 ## Abstract
 
-If you've ever wondered what's really going on inside a transformer, this tutorial is for you. The attention mechanism appears through a physicist's lens—using the language of tensor calculus, bilinear forms, and statistical mechanics. Don't worry if that sounds intimidating; the concepts build step by step.
+If you've ever wondered what's really going on inside a transformer, this tutorial is for you. We're going to look at the attention mechanism through a physicist's lens—using the language of tensor calculus, bilinear forms, and statistical mechanics. Don't worry if that sounds intimidating; we'll build up the concepts step by step.
 
-The punchline—that innocent-looking formula `Attention(Q, K, V) = softmax(QK^T / √d_k) V` hides beautiful mathematical structure:
+The punchline? That innocent-looking formula `Attention(Q, K, V) = softmax(QK^T / √d_k) V` hides beautiful mathematical structure:
 - The score computation is a **bilinear form** with a hidden metric tensor
 - The softmax is actually the **Gibbs distribution** from thermodynamics
-- The whole thing implements an **associative memory network** with exponential storage capacity
+- The whole thing implements an **associative memory network** with exponential storage capacity!
 
-A companion Python library `attn-tensors` implements everything discussed, with 400+ tests verifying gradient derivations against the JAX autodiff.
+A companion Python library `attn-tensors` implements everything we discuss, with 400+ tests verifying our gradient derivations against JAX autodiff.
 
 **Code**: [github.com/planckeon/attn-as-bilinear-form](https://github.com/planckeon/attn-as-bilinear-form)
 
@@ -59,7 +59,7 @@ The attention mechanism has become the foundation of modern deep learning. While
 | $a, b, c$ | Feature/embedding dimensions ($d_k$ or $d_v$) |
 | $h$ | Attention head index ($H$ heads) |
 
-**Einstein summation**: repeated indices (one up, one down) sum:
+**Einstein summation**: Repeated indices (one up, one down) are summed:
 $$v^a u_a = \sum_a v^a u_a$$
 
 ---
@@ -68,11 +68,11 @@ $$v^a u_a = \sum_a v^a u_a$$
 
 ### Vectors and Dual Vectors
 
-In physics, distinction occurs between vectors and their duals (covectors). A vector $v^a$ lives in a vector space $V$, while a covector $u_a$ lives in the dual space $V^*$. The natural pairing between them is:
+In physics, we distinguish between vectors and their duals (covectors). A vector $v^a$ lives in a vector space $V$, while a covector $u_a$ lives in the dual space $V^*$. The natural pairing between them is:
 
 $$\langle u, v \rangle = u_a v^a$$
 
-**Intuition**: in ML terms, a vector $v^a$ is a column vector, and a covector $u_a$ is a row vector. Their pairing is just matrix multiplication.
+**Intuition**: In ML terms, a vector $v^a$ is a column vector, and a covector $u_a$ is a row vector. Their pairing is just matrix multiplication.
 
 ### Metric Tensor
 
@@ -80,21 +80,21 @@ A **metric tensor** $g_{ab}$ is a symmetric, positive-definite tensor that defin
 
 $$\langle u, v \rangle_g = u^a g_{ab} v^b$$
 
-The metric allows:
+The metric allows us to:
 - **Lower indices**: $v_a = g_{ab} v^b$ (vector → covector)
 - **Raise indices**: $v^a = g^{ab} v_b$ (covector → vector)
 
 ### Bilinear Forms
 
-A **bilinear form** is a map $B\colon V \times W \to \mathbb{R}$ that is linear in both arguments:
+A **bilinear form** is a map $B: V \times W \to \mathbb{R}$ that is linear in both arguments:
 
 $$B(u, v) = u^a M_{ab} v^b$$
 
-**The key insight**: the attention score between a query $q$ and key $k$ is precisely a bilinear form:
+**The key insight**: The attention score between a query $q$ and key $k$ is precisely a bilinear form:
 
 $$S = q^a g_{ab} k^b$$
 
-where the metric $g_{ab}$ encodes how similarity is measured in feature space.
+where the metric $g_{ab}$ encodes how we measure similarity in feature space.
 
 ### Standard Metrics
 
@@ -104,24 +104,24 @@ where the metric $g_{ab}$ encodes how similarity is measured in feature space.
 | Scaled Euclidean | $g_{ab} = \frac{1}{\sqrt{d_k}} \delta_{ab}$ | Scaled dot-product attention |
 | Learned | $g_{ab} = (W^T W)_{ab}$ | Learnable similarity |
 
-**Remark**: the $1/\sqrt{d_k}$ scaling has a statistical interpretation—if $q^a$ and $k^a$ are i.i.d. with zero mean and unit variance, then $\text{Var}(q^a k_a) = d_k$. The scaling normalizes the variance to 1.
+**Remark**: The $1/\sqrt{d_k}$ scaling has a statistical interpretation: if $q^a$ and $k^a$ are i.i.d. with zero mean and unit variance, then $\text{Var}(q^a k_a) = d_k$. The scaling normalizes the variance to 1.
 
 ### Einstein Summation (Einsum)
 
-Introducing index notation leads to implementation in code. The `einsum` function, available in NumPy, JAX, PyTorch, and other libraries, directly translates index notation to efficient tensor operations.
+Now that we've introduced index notation, let's talk about how to implement it in code. The `einsum` function, available in NumPy, JAX, PyTorch, and other libraries, directly translates index notation to efficient tensor operations.
 
-**Definition (Einstein Summation Convention)**: in the Einstein summation convention, repeated indices implicitly sum:
+**Definition (Einstein Summation Convention)**: In the Einstein summation convention, repeated indices are implicitly summed:
 
 $$C^{ik} = A^{ij} B_j^{\ k} \quad \Leftrightarrow \quad C_{ik} = \sum_j A_{ij} B_{jk}$$
 
 In code: `C = einsum('ij,jk->ik', A, B)`
 
 The einsum string has a simple grammar:
-- **Input specification** (left of →): comma-separated indices for each input tensor
-- **Output specification** (right of →): indices in the output
-- **Repeated indices** not in output sum over
+- **Input specification** (left of →): Comma-separated indices for each input tensor
+- **Output specification** (right of →): Indices in the output
+- **Repeated indices** not in output are summed over
 
-**Intuition**: think of einsum indices as labels for tensor dimensions. When the same label appears in places, those dimensions pair up for multiplication. When a label is missing from the output, that dimension sums over.
+**Intuition**: Think of einsum indices as labels for tensor dimensions. When the same label appears in multiple places, those dimensions are "paired up" for multiplication. When a label is missing from the output, that dimension is summed over.
 
 **Common Einsum Patterns**:
 
@@ -177,9 +177,9 @@ O = einsum('hij,hjc->hic', A, V_h)
 Y = einsum('hic,hcd->id', O, W_O)
 ```
 
-**Intuition**: einsum makes the summation indices explicit. When you see `'hia,hja->hij'`, you immediately know that `a` (the feature dimension) sums over, while `h`, `i`, `j` are preserved.
+**Intuition**: Einsum makes the summation indices explicit. When you see `'hia,hja->hij'`, you immediately know that `a` (the feature dimension) is being summed over, while `h`, `i`, `j` are preserved.
 
-**Remark**: einsum is not just notation—it's often faster than explicit loops and reshapes because it avoids creating intermediate arrays. For more on einsum, see Sankalp's tutorial ["Shape Rotation 101."](https://sankalp.bearblog.dev/einsum-new/)
+**Remark**: Einsum is not just notation—it's often faster than explicit loops and reshapes because it avoids creating intermediate arrays. For more on einsum, see Sankalp's excellent tutorial ["Shape Rotation 101"](https://sankalp.bearblog.dev/einsum-new/).
 
 ---
 
@@ -187,12 +187,12 @@ Y = einsum('hic,hcd->id', O, W_O)
 
 ### Inputs
 
-- **Queries** $Q^{ia}$: what to look for (shape: $n_q \times d_k$)
-- **Keys** $K^{ja}$: what to match against (shape: $n_k \times d_k$)
-- **Values** $V^{jb}$: what to retrieve (shape: $n_k \times d_v$)
+- **Queries** $Q^{ia}$: What we're looking for (shape: $n_q \times d_k$)
+- **Keys** $K^{ja}$: What we're matching against (shape: $n_k \times d_k$)
+- **Values** $V^{jb}$: What we retrieve (shape: $n_k \times d_v$)
 
-**Intuition**: think of it like a library search:
-- The **query** is your question ("books about physics")
+**Intuition**: Think of it like a library search:
+- The **query** is your question ("I want books about physics")
 - The **keys** are the book titles (what you match against)
 - The **values** are the actual book contents (what you get back)
 
@@ -231,7 +231,7 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right
 
 ## Part III: Statistical Mechanics
 
-The softmax function is not merely a normalization trick—this is the **Gibbs distribution** from statistical mechanics.
+The softmax function is not merely a normalization trick—it is the **Gibbs distribution** from statistical mechanics.
 
 ### The Gibbs/Boltzmann Distribution
 
@@ -265,7 +265,7 @@ $$H^i = -\sum_j A^{ij} \log A^{ij}$$
 - $H = 0$: All attention on one key (focused)
 - $H = \log(n_k)$: Uniform attention (diffuse)
 
-**Intuition**: low entropy = confident model. High entropy = uncertain model.
+**Intuition**: Low entropy = confident model. High entropy = uncertain model.
 
 ### Free Energy
 
@@ -273,14 +273,14 @@ The **free energy** combines energy and entropy:
 
 $$F^i = -T \log Z^i = \langle E \rangle - T \cdot H$$
 
-**Theorem (Variational Principle)**: the attention weights reduce the free energy:
+**Theorem (Variational Principle)**: The attention weights minimize the free energy:
 $$A^* = \arg\min_A [\langle E \rangle - T H(A)]$$
 
 ---
 
 ## Part IV: Differential Geometry
 
-The feature space where queries and keys live has understanding as a Riemannian manifold.
+The feature space where queries and keys live can be understood as a Riemannian manifold.
 
 ### Riemannian Manifold
 
@@ -330,7 +330,7 @@ $$\frac{\partial L}{\partial V^{mn}} = A^{im} \frac{\partial L}{\partial O^{in}}
 
 ### Softmax Jacobian
 
-**Lemma**: for $A^{ij} = \exp(S^{ij}) / \sum_k \exp(S^{ik})$:
+**Lemma**: For $A^{ij} = \exp(S^{ij}) / \sum_k \exp(S^{ik})$:
 
 $$\frac{\partial A^{ij}}{\partial S^{mn}} = \delta^i_m A^{ij} (\delta^j_n - A^{in})$$
 
@@ -339,7 +339,7 @@ $$\frac{\partial A^{ij}}{\partial S^{mn}} = \delta^i_m A^{ij} (\delta^j_n - A^{i
 **Theorem (Softmax Gradient)**:
 $$\frac{\partial L}{\partial S^{mn}} = A^{mn} \left( \frac{\partial L}{\partial A^{mn}} - \sum_j A^{mj} \frac{\partial L}{\partial A^{mj}} \right)$$
 
-**Intuition**: the subtraction ensures the gradient respects the constraint that attention weights sum to 1.
+**Intuition**: The subtraction ensures the gradient respects the constraint that attention weights sum to 1.
 
 ### Query and Key Gradients
 
@@ -361,7 +361,7 @@ Given upstream gradient $\partial L / \partial O$:
 
 ## Part VI: Multi-Head Attention
 
-Multi-head attention runs attention operations in parallel with different learned projections.
+Multi-head attention runs multiple attention operations in parallel with different learned projections.
 
 ### Structure
 
@@ -380,7 +380,7 @@ $$O^{hic} = A^{hij} V^{hjc}$$
 **Output projection**:
 $$Y^{id} = O^{hic} W_O^{hcd}$$
 
-**Intuition**: each head can learn to attend to different aspects—syntax, semantics, positions. The output projection combines these perspectives.
+**Intuition**: Each head can learn to attend to different aspects—syntax, semantics, positions. The output projection combines these perspectives.
 
 ---
 
@@ -388,7 +388,7 @@ $$Y^{id} = O^{hic} W_O^{hcd}$$
 
 ### Causal Masking
 
-For autoregressive models, prevent position $i$ from attending to future positions $j > i\colon$
+For autoregressive models, prevent position $i$ from attending to future positions $j > i$:
 
 $$M^{ij} = \begin{cases} 1 & \text{if } j \le i \\ 0 & \text{otherwise} \end{cases}$$
 
@@ -417,7 +417,7 @@ A remarkable connection exists between transformer attention and modern Hopfield
 Store $M$ patterns $\xi_\mu$ in a weight matrix:
 $$W_{ij} = \frac{1}{N} \sum_\mu \xi_\mu^i \xi_\mu^j$$
 
-**Problem**: capacity scales only as $M \approx 0.14 N$ patterns.
+**Problem**: Capacity scales only as $M \approx 0.14 N$ patterns.
 
 ### Modern Hopfield Networks
 
@@ -435,24 +435,24 @@ This is exactly attention with:
 
 ### Exponential Capacity
 
-**Theorem**: modern Hopfield networks can store exponentially many patterns:
+**Theorem**: Modern Hopfield networks can store exponentially many patterns:
 $$M \approx \exp(d/2)$$
 
 compared to $M \approx 0.14 N$ for classical networks.
 
-**Intuition**: this is why transformers are so powerful. Each attention layer is an associative memory with exponential capacity.
+**Intuition**: This is why transformers are so powerful! Each attention layer is an associative memory with exponential capacity.
 
 ---
 
 ## Part IX: Efficient Attention
 
-Standard attention has $O(n^2)$ complexity. Efficient alternatives exist.
+Standard attention has $O(n^2)$ complexity. Let's look at efficient alternatives.
 
 ### Flash Attention
 
 Achieves $O(n)$ memory by computing attention block-wise using **online softmax**:
 
-Given running max $m$ and sum $\ell$, incorporate new elements:
+Given running maximum $m$ and sum $\ell$, incorporate new elements:
 $$m' = \max(m, \max(x_{\text{new}}))$$
 $$\ell' = \ell \cdot \exp(m - m') + \sum \exp(x_{\text{new}} - m')$$
 
@@ -468,9 +468,9 @@ $$K(q, k) \approx \phi(q)^T \phi(k)$$
 Then:
 $$o_i = \frac{\phi(q_i)^T \sum_j \phi(k_j) v_j^T}{\phi(q_i)^T \sum_j \phi(k_j)}$$
 
-The sums can precompute, giving $O(nd^2)$ instead of $O(n^2 d)$.
+The sums can be precomputed, giving $O(nd^2)$ instead of $O(n^2 d)$.
 
-**Common feature maps**: random Fourier features, ELU+1, Performers
+**Common feature maps**: Random Fourier features, ELU+1, Performers
 
 ---
 
@@ -480,17 +480,17 @@ The sums can precompute, giving $O(nd^2)$ instead of $O(n^2 d)$.
 
 $$Q = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad K = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}, \quad V = \begin{pmatrix} 2 & 0 \\ 0 & 2 \\ 1 & 1 \end{pmatrix}$$
 
-**Step 1: scores** ($\sqrt{d_k} = \sqrt{2} \approx 1.414$)
+**Step 1: Scores** ($\sqrt{d_k} = \sqrt{2} \approx 1.414$)
 
 $$S = \frac{1}{\sqrt{2}} Q K^T \approx \begin{pmatrix} 0.707 & 0 & 0.707 \\ 0 & 0.707 & 0.707 \end{pmatrix}$$
 
-**Step 2: softmax**
+**Step 2: Softmax**
 
 Row 1: $\exp([0.707, 0, 0.707]) \approx [2.028, 1.000, 2.028]$, sum = 5.056
 
 $$A \approx \begin{pmatrix} 0.401 & 0.198 & 0.401 \\ 0.198 & 0.401 & 0.401 \end{pmatrix}$$
 
-**Step 3: output**
+**Step 3: Output**
 
 $$O = A V \approx \begin{pmatrix} 1.203 & 0.797 \\ 0.797 & 1.203 \end{pmatrix}$$
 
@@ -512,24 +512,24 @@ For scores $S = [2, 1, 0]$:
 
 | Symbol | Meaning |
 |--------|---------|
-| $Q^{ia}$ | query tensor, position $i$, feature $a$ |
-| $K^{ja}$ | key tensor, position $j$, feature $a$ |
-| $V^{jb}$ | value tensor, position $j$, feature $b$ |
-| $S^{ij}$ | attention scores |
-| $A^{ij}$ | attention weights |
-| $O^{ib}$ | output tensor |
-| $g_{ab}$ | metric tensor |
-| $\delta^a_b$ | kronecker delta |
-| $Z^i$ | partition function |
-| $H^i$ | entropy |
-| $T$ | temperature |
-| $\beta$ | inverse temperature ($1/T$) |
+| $Q^{ia}$ | Query tensor, position $i$, feature $a$ |
+| $K^{ja}$ | Key tensor, position $j$, feature $a$ |
+| $V^{jb}$ | Value tensor, position $j$, feature $b$ |
+| $S^{ij}$ | Attention scores |
+| $A^{ij}$ | Attention weights |
+| $O^{ib}$ | Output tensor |
+| $g_{ab}$ | Metric tensor |
+| $\delta^a_b$ | Kronecker delta |
+| $Z^i$ | Partition function |
+| $H^i$ | Entropy |
+| $T$ | Temperature |
+| $\beta$ | Inverse temperature ($1/T$) |
 
 ---
 
 ## The attn-tensors Library
 
-All derivations verify against the JAX autodiff. 400+ tests.
+All derivations verified against JAX autodiff. 400+ tests.
 
 ### Quick Start
 
@@ -576,4 +576,4 @@ print(results)  # {'dL_dQ': True, 'dL_dK': True, 'dL_dV': True, 'all_correct': T
 
 **Documentation**: [planckeon.github.io/attn-as-bilinear-form](https://planckeon.github.io/attn-as-bilinear-form/)
 
-**License**: mit
+**License**: MIT

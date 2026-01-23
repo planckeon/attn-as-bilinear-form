@@ -7,7 +7,7 @@ weight = 2
 
 **Einstein summation notation** (einsum) is a compact notation for expressing tensor operations. First introduced by Albert Einstein for tensor calculus in physics, it has become a powerful tool for implementing attention mechanisms.
 
-The core idea: **repeated indices sum over**.
+The core idea: **repeated indices are summed over**.
 
 $$C^{ik} = A^{ij} B^{jk} \quad \Leftrightarrow \quad C_{ik} = \sum_j A_{ij} B_{jk}$$
 
@@ -19,10 +19,10 @@ C = jnp.einsum('ij,jk->ik', A, B)  # Matrix multiplication
 
 ## Why Learn Einsum?
 
-1. **Self-documenting**: the string `'ij,jk->ik'` tells you exactly what dimensions are involved
-2. **Efficient**: avoids intermediate arrays and unnecessary reshaping
-3. **Universal**: same notation in NumPy, JAX, PyTorch, TensorFlow
-4. **Direct mapping**: index notation in math → einsum in code
+1. **Self-documenting**: The string `'ij,jk->ik'` tells you exactly what dimensions are involved
+2. **Efficient**: Avoids intermediate arrays and unnecessary reshaping
+3. **Universal**: Same notation in NumPy, JAX, PyTorch, TensorFlow
+4. **Direct mapping**: Index notation in math → einsum in code
 
 > "To become a true shape rotator, one must master einsum."
 > — [Sankalp's blog](https://sankalp.bearblog.dev/einsum-new/)
@@ -101,10 +101,10 @@ C = jnp.einsum('bik,bkj->bij', A, B)
 
 ## Understanding Summation Indices
 
-Indices partition into two types:
+Indices are partitioned into two types:
 
-- **Free indices**: appear in output → outer loops
-- **Summation indices**: not in output → summed (inner loops)
+- **Free indices**: Appear in output → outer loops
+- **Summation indices**: Not in output → summed (inner loops)
 
 For `'ij,jk->ik'`:
 - Free: `i`, `k` (appear in output)
@@ -123,7 +123,7 @@ for i in range(I):
 
 ## Tensor Contraction
 
-**Tensor contraction** generalizes matrix multiplication to higher dimensions. When summing over shared indices, contraction occurs:
+**Tensor contraction** generalizes matrix multiplication to higher dimensions. When we sum over shared indices, we're "contracting" tensors:
 
 $$\text{result}_i = \sum_j A_i \cdot B_{i,j}$$
 
@@ -131,7 +131,7 @@ This is exactly what einsum does: multiply tensors and sum over specified indice
 
 ## Einsum in Attention
 
-The attention mechanism is a perfect use case for einsum. Each step maps as follows:
+The attention mechanism is a perfect use case for einsum. Let's see how each step maps:
 
 ### Standard Indices Convention
 
@@ -274,7 +274,7 @@ Einsum is essentially index notation with automatic summation. Compare:
 | $S^{ij} = Q^{ia} g_{ab} K^{jb}$ | `'ia,ab,jb->ij'` |
 | $O^{ib} = A^{ij} V_j^{\ b}$ | `'ij,jb->ib'` |
 
-The summation convention (sum over repeated indices) maps directly to einsum's rule: indices not in output sum.
+The summation convention (sum over repeated indices) maps directly to einsum's rule: indices not in output are summed.
 
 ## Common Patterns
 
@@ -292,7 +292,7 @@ The summation convention (sum over repeated indices) maps directly to einsum's r
 
 Einsum can be faster than explicit loops and reshapes because:
 
-1. **No intermediate arrays**: Operations are fused without intermediate arrays.
+1. **No intermediate arrays**: Operations are fused
 2. **No reshaping overhead**: No need for `np.newaxis` or `reshape`
 3. **Optimized paths**: Libraries find optimal contraction order
 
@@ -370,7 +370,7 @@ C = jnp.einsum('bi,bj->bij', a, b)
 
 ## References
 
-This page draws from resources:
+This page draws from several excellent resources:
 
 - [Shape Rotation 101: An Intro to Einsum and Jax Transformers](https://sankalp.bearblog.dev/einsum-new/) by Sankalp
 - [Einstein summation in NumPy](https://obilaniu6266h16.wordpress.com/2016/02/04/einstein-summation-in-numpy/)

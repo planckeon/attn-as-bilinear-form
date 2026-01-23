@@ -7,7 +7,7 @@ weight = 5
 
 Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions.
 
-With a single head, averaging over positions inhibits this. Multiple heads provide independent views of the sequence.
+With a single head, averaging over positions inhibits this. Multiple heads provide independent "views" of the sequence.
 
 ## Index Notation for Multi-Head
 
@@ -87,7 +87,7 @@ $$\frac{\partial L}{\partial W_O^{hcd}} = O^{hic} \frac{\partial L}{\partial Y^{
 
 ## Geometric View: Subspace Projections
 
-Each head can be visualized as projecting queries and keys into a $d_k$-dimensional subspace:
+Each head projects queries and keys into a $d_k$-dimensional subspace:
 
 $$Q_h = X W_Q^h \in \mathbb{R}^{n \times d_k}$$
 
@@ -157,7 +157,7 @@ Instead of separate $W_Q, W_K, W_V$, use a single fused projection:
 
 $$[Q; K; V] = X W_{QKV}$$
 
-where $W_{QKV}$ has shape $d_{model} \times 3 d_{model}$.
+where $W_{QKV}$ has shape $d_{model} \times 3d_{model}$.
 
 ### Memory Layout
 
@@ -172,4 +172,4 @@ Multi-head attention resembles ensemble learning:
 - Output projection combines expert opinions
 - Diversity encouraged by random initialization
 
-Unlike ensembles, heads share the same input and train jointly.
+Unlike ensembles, heads share the same input and are trained jointly.
