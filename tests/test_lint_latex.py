@@ -9,13 +9,13 @@ These tests verify that the LaTeX linter:
 5. Handles edge cases
 """
 
+# Import the linter module
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 
-# Import the linter module
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from lint_latex import LatexLinter
 
@@ -29,13 +29,15 @@ def linter():
 @pytest.fixture
 def temp_md_file():
     """Create a temporary markdown file for testing."""
+
     def _create_file(content):
-        f = tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False)
+        f = tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False)
         f.write(content)
         f.flush()
         f.close()
         filepath = Path(f.name)
         return filepath
+
     return _create_file
 
 
@@ -46,13 +48,13 @@ class TestLatexLinter:
         """Test that multi-letter subscripts without \\text{} are detected."""
         content = "$X_{Input}$"  # Mixed case should be caught
         filepath = temp_md_file(content)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
             assert len(linter.errors) == 1
-            assert 'Input' in linter.errors[0]['error']
-            assert linter.errors[0]['match'] == '_{Input}'
+            assert "Input" in linter.errors[0]["error"]
+            assert linter.errors[0]["match"] == "_{Input}"
         finally:
             filepath.unlink()
 
@@ -60,12 +62,12 @@ class TestLatexLinter:
         """Test that multi-letter superscripts without \\text{} are detected."""
         content = "$X^{ERROR}$"
         filepath = temp_md_file(content)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
             assert len(linter.errors) == 1
-            assert 'ERROR' in linter.errors[0]['error']
+            assert "ERROR" in linter.errors[0]["error"]
         finally:
             filepath.unlink()
 
@@ -73,12 +75,12 @@ class TestLatexLinter:
         """Test that single-letter subscripts are allowed."""
         linter = LatexLinter()
         content = "$x_i$ and $y_j$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -89,12 +91,12 @@ class TestLatexLinter:
         """Test that tensor index notation is allowed."""
         linter = LatexLinter()
         content = "$Q^{ia}$ and $K_{jb}$ and $S^{ij}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -105,12 +107,12 @@ class TestLatexLinter:
         """Test that common math operators are allowed."""
         linter = LatexLinter()
         content = "$x_{min}$ and $y_{max}$ and $z_{log}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -121,12 +123,12 @@ class TestLatexLinter:
         """Test that dimension names like 'd_model' are allowed."""
         linter = LatexLinter()
         content = "$d_{model}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -137,12 +139,12 @@ class TestLatexLinter:
         """Test that \\text{} wrapped subscripts are not flagged."""
         linter = LatexLinter()
         content = r"$X_{\text{input}}$ and $Y_{\text{output}}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -151,7 +153,7 @@ class TestLatexLinter:
 
     def test_lowercase_words_allowed_for_tensor_notation(self, linter, temp_md_file):
         """Test that all-lowercase words are allowed as tensor notation.
-        
+
         Note: While 'input' and 'token' were in the original issue and we fixed
         them to use \\text{}, the linter allows all-lowercase multi-letter
         combinations by design (e.g., 'ab', 'ij', 'hia') for tensor indices.
@@ -160,7 +162,7 @@ class TestLatexLinter:
         """
         content = "$X_{input}$ and $Y_{token}$"
         filepath = temp_md_file(content)
-        
+
         try:
             errors = linter.lint_file(filepath)
             # These pass because they're all lowercase (treated as tensor notation)
@@ -178,16 +180,16 @@ Some text.
 $X_{WRONG}$
 
 More text."""
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
-            assert linter.errors[0]['line'] == 5
+            assert linter.errors[0]["line"] == 5
         finally:
             filepath.unlink()
 
@@ -208,17 +210,17 @@ More text.
 
 $$Y_{WRONG}$$
 """
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 2
             # First error on line 3, second on line 13
-            line_numbers = sorted([e['line'] for e in linter.errors])
+            line_numbers = sorted([e["line"] for e in linter.errors])
             assert line_numbers == [3, 13]
         finally:
             filepath.unlink()
@@ -234,17 +236,17 @@ $X_{SHOULD_BE_IGNORED}$
 
 Real math: $Y_{CAUGHT}$
 """
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
-            assert 'CAUGHT' in linter.errors[0]['error']
-            assert 'SHOULD_BE_IGNORED' not in str(linter.errors)
+            assert "CAUGHT" in linter.errors[0]["error"]
+            assert "SHOULD_BE_IGNORED" not in str(linter.errors)
         finally:
             filepath.unlink()
 
@@ -252,16 +254,16 @@ Real math: $Y_{CAUGHT}$
         """Test that inline code blocks are skipped."""
         linter = LatexLinter()
         content = "Use `$X_{IGNORED}$` in your code. But $Y_{CAUGHT}$ is real."
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
-            assert 'CAUGHT' in linter.errors[0]['error']
+            assert "CAUGHT" in linter.errors[0]["error"]
         finally:
             filepath.unlink()
 
@@ -269,16 +271,16 @@ Real math: $Y_{CAUGHT}$
         """Test detection in display math ($$...$$)."""
         linter = LatexLinter()
         content = "$$X^{ia}_{WRONG}$$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
-            assert 'WRONG' in linter.errors[0]['error']
+            assert "WRONG" in linter.errors[0]["error"]
         finally:
             filepath.unlink()
 
@@ -286,12 +288,12 @@ Real math: $Y_{CAUGHT}$
         """Test detection of multiple errors in a single math expression."""
         linter = LatexLinter()
         content = "$X_{ERROR}^{ALSO}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 2
@@ -301,12 +303,12 @@ Real math: $Y_{CAUGHT}$
     def test_non_markdown_file_warning(self):
         """Test that non-markdown files produce a warning."""
         linter = LatexLinter()
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("$X_{WRONG}$")
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             # The linter should skip non-.md files
             # We need to check the main() function behavior
@@ -321,12 +323,12 @@ Real math: $Y_{CAUGHT}$
         """Test that empty files don't cause errors."""
         linter = LatexLinter()
         content = ""
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -343,12 +345,12 @@ This is just regular text with no math.
 - List item 1
 - List item 2
 """
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -359,12 +361,12 @@ This is just regular text with no math.
         """Test complex tensor notation with multiple indices."""
         linter = LatexLinter()
         content = "$Q^{hia}$ and $K_{bjk}$ and $R^{abc}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 0
@@ -375,16 +377,16 @@ This is just regular text with no math.
         """Test that mixed case (uppercase) subscripts are caught."""
         linter = LatexLinter()
         content = "$X_{QKV}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             errors = linter.lint_file(filepath)
             assert errors == 1
-            assert 'QKV' in linter.errors[0]['error']
+            assert "QKV" in linter.errors[0]["error"]
         finally:
             filepath.unlink()
 
@@ -392,21 +394,21 @@ This is just regular text with no math.
         """Test that errors are reported with the correct format."""
         linter = LatexLinter()
         content = "$X_{ERROR}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             filepath = Path(f.name)
-        
+
         try:
             linter.lint_file(filepath)
             assert len(linter.errors) == 1
             error = linter.errors[0]
-            assert 'file' in error
-            assert 'line' in error
-            assert 'error' in error
-            assert 'match' in error
-            assert error['match'] == '_{ERROR}'
+            assert "file" in error
+            assert "line" in error
+            assert "error" in error
+            assert "match" in error
+            assert error["match"] == "_{ERROR}"
         finally:
             filepath.unlink()
 
@@ -417,52 +419,52 @@ class TestLatexLinterValidators:
     def test_is_valid_subscript_single_letter(self):
         """Test that single letters are valid subscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('i')
-        assert linter._is_valid_subscript('j')
-        assert linter._is_valid_subscript('a')
+        assert linter._is_valid_subscript("i")
+        assert linter._is_valid_subscript("j")
+        assert linter._is_valid_subscript("a")
 
     def test_is_valid_subscript_tensor_notation(self):
         """Test that tensor notation is valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('ab')
-        assert linter._is_valid_subscript('ij')
-        assert linter._is_valid_subscript('hia')
-        assert linter._is_valid_subscript('abc')
+        assert linter._is_valid_subscript("ab")
+        assert linter._is_valid_subscript("ij")
+        assert linter._is_valid_subscript("hia")
+        assert linter._is_valid_subscript("abc")
 
     def test_is_valid_subscript_math_operators(self):
         """Test that math operators are valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('min')
-        assert linter._is_valid_subscript('max')
-        assert linter._is_valid_subscript('log')
-        assert linter._is_valid_subscript('sin')
+        assert linter._is_valid_subscript("min")
+        assert linter._is_valid_subscript("max")
+        assert linter._is_valid_subscript("log")
+        assert linter._is_valid_subscript("sin")
 
     def test_is_valid_subscript_dimension_names(self):
         """Test that dimension names are valid."""
         linter = LatexLinter()
-        assert linter._is_valid_subscript('model')
+        assert linter._is_valid_subscript("model")
 
     def test_is_valid_subscript_invalid_words(self):
         """Test that multi-letter words with caps are invalid."""
         linter = LatexLinter()
-        assert not linter._is_valid_subscript('ERROR')
-        assert not linter._is_valid_subscript('QKV')
-        assert not linter._is_valid_subscript('Input')
+        assert not linter._is_valid_subscript("ERROR")
+        assert not linter._is_valid_subscript("QKV")
+        assert not linter._is_valid_subscript("Input")
 
     def test_is_valid_superscript_single_letter(self):
         """Test that single letters are valid superscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_superscript('i')
-        assert linter._is_valid_superscript('a')
+        assert linter._is_valid_superscript("i")
+        assert linter._is_valid_superscript("a")
 
     def test_is_valid_superscript_tensor_notation(self):
         """Test that tensor notation is valid for superscripts."""
         linter = LatexLinter()
-        assert linter._is_valid_superscript('ia')
-        assert linter._is_valid_superscript('hia')
+        assert linter._is_valid_superscript("ia")
+        assert linter._is_valid_superscript("hia")
 
     def test_is_valid_superscript_invalid(self):
         """Test that capitalized words are invalid superscripts."""
         linter = LatexLinter()
-        assert not linter._is_valid_superscript('ERROR')
-        assert not linter._is_valid_superscript('NEW')
+        assert not linter._is_valid_superscript("ERROR")
+        assert not linter._is_valid_superscript("NEW")
