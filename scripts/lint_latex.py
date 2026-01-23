@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-LaTeX/MathJax linter for markdown and Python files.
+LaTeX/MathJax linter for markdown files.
 
-This script checks for common LaTeX formatting errors in markdown files
-and Python docstrings, particularly in inline math ($...$) and display
-math ($$...$$) blocks.
+This script checks for common LaTeX formatting errors in markdown content,
+particularly in inline math ($...$) and display math ($$...$$) blocks.
+"""
 """
 
 import re
