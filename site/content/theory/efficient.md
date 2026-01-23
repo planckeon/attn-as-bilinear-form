@@ -55,7 +55,7 @@ Combine local attention with global tokens:
 $$A^{ij} = \text{local}(i, j) + \text{global}(i) + \text{global}(j)$$
 
 - **Local:** Sliding window of size $w$
-- **Global:** Selected tokens (e.g., [CLS]) attend to/from all positions
+- **Global:** Selected tokens (for example, [CLS]) attend to/from all positions
 
 ### BigBird Pattern
 
@@ -63,7 +63,7 @@ Longformer + random attention:
 
 $$A = A_{local} + A_{global} + A_{random}$$
 
-Random edges ensure any two tokens are connected with high probability.
+Random edges ensure any two tokens connect with high probability.
 
 ## Sparse Attention in Index Notation
 
@@ -152,11 +152,11 @@ def flash_attention(Q, K, V, block_size=64):
 
 ### Backward Pass
 
-Key insight: Don't store attention matrix! Recompute during backward.
+Key insight: avoid storing attention matrix. Recompute during backward.
 
-**Forward:** Store only $O$, $\ell$ (log-sum-exp), $m$ (max)
+**Forward**: store only $O$, $\ell$ (log-sum-exp), $m$ (max)
 
-**Backward:** Recompute $S$ and $A$ block-by-block while computing gradients.
+**Backward**: recompute $S$ and $A$ block-by-block while computing gradients.
 
 ### Gradient Computation
 
@@ -196,7 +196,7 @@ Standard attention:
 
 $$O_i = \frac{\sum_j \exp(q_i^T k_j) v_j}{\sum_j \exp(q_i^T k_j)}$$
 
-If we approximate $\exp(q^T k) \approx \phi(q)^T \phi(k)$:
+If $\exp(q^T k) \approx \phi(q)^T \phi(k)$ approximates:
 
 $$O_i = \frac{\sum_j \phi(q_i)^T \phi(k_j) v_j}{\sum_j \phi(q_i)^T \phi(k_j)}$$
 
@@ -205,12 +205,12 @@ $$= \frac{\phi(q_i)^T \sum_j \phi(k_j) v_j^T}{\phi(q_i)^T \sum_j \phi(k_j)}$$
 ### Complexity
 
 Precompute:
-- $KV = \sum_j \phi(k_j) v_j^T$ — shape $(d_\phi, d_v)$
-- $K_{sum} = \sum_j \phi(k_j)$ — shape $(d_\phi,)$
+- $KV = \sum_j \phi(k_j) v_j^T$—shape $(d_\phi, d_v)$
+- $K_{sum} = \sum_j \phi(k_j)$—shape $(d_\phi,)$
 
 Then each query costs $O(d_\phi d)$ instead of $O(nd)$.
 
-**Total:** $O(n d_\phi d)$ — linear in sequence length!
+**Total**: $O(n d_\phi d)$—linear in sequence length
 
 ### Feature Maps
 
@@ -232,7 +232,7 @@ For autoregressive models, accumulate incrementally:
 $$KV_i = KV_{i-1} + \phi(k_i) v_i^T$$
 $$O_i = \frac{\phi(q_i)^T KV_i}{\phi(q_i)^T K_{sum,i}}$$
 
-This is an RNN! Hidden state is $(KV, K_{sum})$.
+This is an RNN with hidden state $(KV, K_{sum})$.
 
 ## Multi-Query and Grouped-Query Attention
 
@@ -243,11 +243,11 @@ Share keys and values across all heads:
 $$Q^{hia}: \text{per-head}$$
 $$K^{ja}, V^{jb}: \text{shared across heads}$$
 
-**Savings:** Parameters and KV-cache reduced by factor of $H$.
+**Savings**: parameters and KV-cache reduced by factor of $H$.
 
 ### Grouped-Query Attention (GQA)
 
-Compromise: Group heads, share K/V within groups.
+Compromise: group heads, share K/V within groups.
 
 With $G$ groups and $H$ heads:
 - Each group has $H/G$ heads
@@ -287,5 +287,5 @@ O_local = scaled_dot_product_attention(Q, K, V, mask=mask)
 | Standard | Short sequences (<512) | Simple, exact |
 | Flash | Medium sequences (512-8K) | Exact, memory efficient |
 | Sparse | Long sequences (8K+) | Approximate, task-dependent |
-| Linear | Very long sequences | Approximate, loses expressivity |
+| Linear | Long sequences | Approximate, loses expressivity |
 | MQA/GQA | Inference | Reduced KV-cache |

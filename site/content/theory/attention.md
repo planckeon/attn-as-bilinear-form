@@ -9,7 +9,7 @@ The scaled dot-product attention from "Attention Is All You Need":
 
 $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$
 
-Let's decompose this in index notation.
+Decompose this in index notation.
 
 ## Step-by-Step Breakdown
 
@@ -59,7 +59,7 @@ $$O^{ib} = A^{ij} V^{jb}$$
 
 ## Causal (Masked) Attention
 
-For autoregressive models, we mask future positions:
+For autoregressive models, mask future positions:
 
 $$S^{ij}_{\text{masked}} = \begin{cases}
 S^{ij} & \text{if } j \leq i \\

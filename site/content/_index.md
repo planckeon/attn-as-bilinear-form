@@ -31,9 +31,9 @@ $$O^{ib} = A^{ij} V^{jb}, \quad A^{ij} = \frac{\exp(S^{ij})}{\sum_k \exp(S^{ik})
 
 The score computation is a **bilinear form**:
 
-$$S^{ij} = Q^{ia} \, g_{ab} \, K^{jb}$$
+$$S^{ij} = Q^{ia} g_{ab} K^{jb}$$
 
-where $g_{ab} = \frac{1}{\sqrt{d_k}} \delta_{ab}$ is the **metric tensor**. This gives us:
+where $g_{ab} = \frac{1}{\sqrt{d_k}} \delta_{ab}$ is the **metric tensor**. This provides:
 
 - A geometric interpretation of similarity
 - A framework for learned metrics
@@ -57,13 +57,13 @@ Modern Hopfield networks show attention is an **associative memory**:
 
 $$\xi^{\text{new}} = V^T \cdot \text{softmax}(\beta \cdot K \cdot \xi)$$
 
-The patterns stored in $K$ are retrieved via the attention mechanism.
+The patterns stored in $K$ are retrieved through the attention mechanism.
 
 ---
 
 ## Gradient Derivations
 
-Using index notation, we derive all gradients explicitly:
+Using index notation, all gradients are derived explicitly:
 
 **Gradient w.r.t. Queries:**
 $$\frac{\partial L}{\partial Q^{kl}} = \frac{1}{\sqrt{d_k}} \frac{\partial L}{\partial S^{kj}} K^{jl}$$
@@ -74,7 +74,7 @@ $$\frac{\partial L}{\partial S^{ij}} = A^{ij} \left( \frac{\partial L}{\partial 
 **Gradient w.r.t. Values:**
 $$\frac{\partial L}{\partial V^{kl}} = A^{ik} \frac{\partial L}{\partial O^{il}}$$
 
-All gradients are verified against JAX autodiff.
+All gradients are verified against the JAX autodiff.
 
 ---
 

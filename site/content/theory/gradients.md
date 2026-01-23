@@ -5,7 +5,7 @@ weight = 3
 
 ## Chain Rule in Index Notation
 
-For backpropagation, we need gradients of the loss $L$ with respect to parameters.
+For backpropagation, gradients of the loss $L$ with respect to parameters are needed.
 
 Using the chain rule:
 
@@ -21,7 +21,7 @@ $$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja}$$
 $$A^{ij} = \text{softmax}_j(S^{ij})$$
 $$O^{ib} = A^{ij} V^{jb}$$
 
-For the backward pass, we propagate gradients in reverse order.
+For the backward pass, gradients propagate in reverse order.
 
 ### Gradient w.r.t. Values
 
@@ -55,7 +55,7 @@ Chain rule gives:
 
 $$\frac{\partial L}{\partial S^{ij}} = A^{ij} \left( \frac{\partial L}{\partial A^{ij}} - \sum_{j'} A^{ij'} \frac{\partial L}{\partial A^{ij'}} \right)$$
 
-**Intuition**: The gradient through softmax involves:
+**Intuition**: the gradient through softmax involves:
 1. The local gradient at position $(i,j)$
 2. Minus the weighted average of gradients (the normalization effect)
 
@@ -91,7 +91,7 @@ Given upstream gradient $\frac{\partial L}{\partial O}$:
 
 ## Verification
 
-All manual gradients can be verified against JAX autodiff:
+All manual gradients can be verified against the JAX autodiff:
 
 ```python
 from attn_tensors.gradients import verify_gradients
@@ -109,12 +109,12 @@ print(results)
 
 1. **Education**: Understanding the math behind autodiff
 2. **Debugging**: Verify your understanding is correct
-3. **Optimization**: Sometimes manual gradients enable tricks (e.g., Flash Attention)
+3. **Optimization**: Sometimes manual gradients enable tricks (for example, Flash Attention)
 4. **Insight**: See gradient flow and potential issues (vanishing/exploding)
 
 ## Deriving the Softmax Jacobian
 
-The softmax Jacobian is crucial for understanding gradient flow. Let's derive it carefully.
+The softmax Jacobian is crucial for understanding gradient flow. Derive it carefully.
 
 ### Setup
 
@@ -122,7 +122,7 @@ Given scores $S = [s_1, \ldots, s_n]$, the softmax outputs are:
 
 $$a_i = \frac{e^{s_i}}{\sum_k e^{s_k}} = \frac{e^{s_i}}{Z}$$
 
-We want $\frac{\partial a_i}{\partial s_j}$.
+Computing $\frac{\partial a_i}{\partial s_j}$ is needed.
 
 ### Case 1: $i = j$ (Diagonal elements)
 
@@ -132,7 +132,7 @@ $$\frac{\partial a_i}{\partial s_i} = \frac{e^{s_i} \cdot Z - e^{s_i} \cdot e^{s
 
 $$= a_i - a_i^2 = a_i(1 - a_i)$$
 
-### Case 2: $i \neq j$ (Off-diagonal elements)
+### Case 2: $i \neq j$ (off-diagonal elements)
 
 $$\frac{\partial a_i}{\partial s_j} = \frac{0 \cdot Z - e^{s_i} \cdot e^{s_j}}{Z^2} = -\frac{e^{s_i} e^{s_j}}{Z^2}$$
 
@@ -158,7 +158,7 @@ The $\delta^i_m$ enforces that softmax is independent across queries.
 
 ### Vanishing Gradients in Sharp Attention
 
-When attention is very peaked ($A^{ij} \approx 1$ for one $j$, 0 elsewhere):
+When attention is peaked ($A^{ij} \approx 1$ for one $j$, 0 elsewhere):
 
 $$\frac{\partial L}{\partial S^{ij}} = A^{ij}(\bar{A}^{ij} - \sum_{j'} A^{ij'}\bar{A}^{ij'})$$
 
@@ -166,7 +166,7 @@ If $A^{ij} \approx 1$ and $A^{ij'} \approx 0$ for $j' \neq j$:
 
 $$\frac{\partial L}{\partial S^{ij}} \approx 1 \cdot (\bar{A}^{ij} - \bar{A}^{ij}) = 0$$
 
-The gradient vanishes! This is the "hard attention" problem.
+The gradient vanishes. This is the "hard attention" problem.
 
 ### Temperature Scaling for Better Gradients
 
@@ -180,7 +180,7 @@ Higher $\tau$ → softer attention → better gradient flow.
 
 ### Log-Sum-Exp Trick
 
-Computing softmax naively:
+Computing softmax normalization requires care:
 
 ```python
 exp_s = exp(s)  # Can overflow!

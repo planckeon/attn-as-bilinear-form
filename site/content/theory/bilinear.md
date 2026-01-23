@@ -5,7 +5,7 @@ weight = 1
 
 ## Mathematical Foundation
 
-A **bilinear form** is a map $B: V \times W \to \mathbb{R}$ that is linear in both arguments.
+A **bilinear form** is a map $B\colon V \times W \to \mathbb{R}$ that is linear in both arguments.
 
 In index notation:
 
@@ -15,16 +15,16 @@ where $g_{ab}$ is a **metric tensor**.
 
 ## Index Conventions
 
-We use physics conventions throughout:
+Physics conventions are used throughout:
 
 | Notation | Meaning |
 |----------|---------|
 | $u^a$ | Contravariant vector (upper index) |
 | $u_a$ | Covariant vector (lower index) |
-| $g_{ab}$ | Metric tensor (lowers indices) |
-| $g^{ab}$ | Inverse metric (raises indices) |
+| $g_{ab}$ | metric tensor (lowers indices) |
+| $g^{ab}$ | inverse metric (raises indices) |
 
-**Einstein summation**: Repeated indices (one up, one down) are summed:
+**Einstein summation**: repeated indices (one up, one down) sum over:
 
 $$u^a v_a = \sum_{a=1}^{d} u^a v_a$$
 
@@ -83,7 +83,7 @@ For standard attention:
 
 $$g_{ab} = \frac{1}{\sqrt{d_k}} \delta_{ab}$$
 
-This is why the formula has $\frac{QK^T}{\sqrt{d_k}}$ — the metric tensor is embedded in the scaling!
+This is why the formula has $\frac{QK^T}{\sqrt{d_k}}$—the metric tensor embeds in the scaling
 
 ## Code Example
 
@@ -112,7 +112,7 @@ scores = bilinear_form_batch(Q, K, g)  # shape: (10, 20)
 
 ## Worked Example: Computing Bilinear Forms
 
-Let's compute attention scores step-by-step with a tiny example.
+Compute attention scores step-by-step with a small example.
 
 **Setup:**
 - Dimension $d = 3$
@@ -120,11 +120,11 @@ Let's compute attention scores step-by-step with a tiny example.
 - Key: $k = [2, 1, 0]$
 - Metric: $g = \frac{1}{\sqrt{3}} I_3$ (scaled identity)
 
-**Step 1: Write out the metric tensor**
+**Step 1: write out the metric tensor**
 
 $$g_{ab} = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$$
 
-**Step 2: Compute the bilinear form**
+**Step 2: compute the bilinear form**
 
 $$B(q, k) = q^a g_{ab} k^b = \frac{1}{\sqrt{3}} \sum_{a=1}^{3} q^a k^a$$
 
@@ -132,7 +132,7 @@ $$= \frac{1}{\sqrt{3}} (1 \cdot 2 + 2 \cdot 1 + 1 \cdot 0)$$
 
 $$= \frac{1}{\sqrt{3}} (2 + 2 + 0) = \frac{4}{\sqrt{3}} \approx 2.31$$
 
-**Interpretation:** This is the attention score between this query-key pair.
+**Interpretation**: this is the attention score between this query-key pair.
 
 ## Generalized Metrics: Learning Similarity
 
@@ -142,11 +142,11 @@ A learned metric $g_{ab} = (W^T W)_{ab}$ gives:
 
 $$B(q, k) = q^T W^T W k = (Wq)^T (Wk)$$
 
-This computes dot product in a transformed space!
+This computes dot product in a transformed space
 
 ### Asymmetric Bilinear Forms
 
-We can also use non-symmetric matrices:
+Non-symmetric matrices are also used:
 
 $$B(q, k) = q^T M k$$
 
