@@ -26,13 +26,13 @@ class LatexLinter:
             (
                 r'_\{([a-zA-Z]{2,})\}',
                 r'Subscript with multi-letter word "{}" should use \\text{{}} or be a single letter/symbol',
-                self._is_valid_subscript
+                'subscript'
             ),
             # Superscripts with multi-letter words (not wrapped in \text{})
             (
                 r'\^\{([a-zA-Z]{2,})\}',
                 r'Superscript with multi-letter word "{}" should use \\text{{}} or be a single letter/symbol',
-                self._is_valid_superscript
+                'superscript'
             ),
         ]
 
@@ -112,18 +112,12 @@ class LatexLinter:
         # Get line number from cleaned content
         line_num = self._content_for_linting[:start_pos].count('\n') + 1
         
-        for pattern, error_msg, validator in self.patterns:
+        for pattern, error_msg, pattern_type in self.patterns:
             for match in re.finditer(pattern, math_content):
                 word = match.group(1)
-                # Check if this word needs \text{} wrapper
-                if pattern.startswith('_') and not validator(word):
-                    self.errors.append({
-                        'file': filepath,
-                        'line': line_num,
-                        'error': error_msg.format(word),
-                        'match': match.group(0)
-                    })
-                elif pattern.startswith(r'\^') and not validator(word):
+                # Check if this word needs \text{} wrapper based on pattern type
+                validator = self._is_valid_subscript if pattern_type == 'subscript' else self._is_valid_superscript
+                if not validator(word):
                     self.errors.append({
                         'file': filepath,
                         'line': line_num,
