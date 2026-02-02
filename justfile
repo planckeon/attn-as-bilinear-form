@@ -130,3 +130,21 @@ clean-vale:
 
 # Run all linters
 lint-all: lint-vale lint-latex
+
+# Fix underscores in LaTeX math blocks (prevents Markdown emphasis interpretation)
+fix-math:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 scripts/fix_math_underscores.py \
+        $(find site/content -name "*.md" -type f)
+
+# Build the Zola site
+build:
+    cd site && zola build
+
+# Serve the Zola site locally
+serve:
+    cd site && zola serve
+
+# Full build pipeline: fix math, lint, build
+build-all: fix-math lint-all build

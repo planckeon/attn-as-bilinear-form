@@ -61,7 +61,7 @@ $$O^{ib} = A^{ij} V^{jb}$$
 
 For autoregressive models, we mask future positions:
 
-$$S^{ij}_{\text{masked}} = \begin{cases}
+$$S^{ij}&#95;{\text{masked}} = \begin{cases}
 S^{ij} & \text{if } j \leq i \\
 -\infty & \text{if } j > i
 \end{cases}$$

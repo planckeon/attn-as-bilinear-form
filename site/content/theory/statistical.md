@@ -241,7 +241,7 @@ High heat capacity near phase transitions—when attention is "deciding" between
 
 Response to perturbation in scores:
 
-$$\chi^{ij}_{kl} = \frac{\partial A^{ij}}{\partial S^{kl}}$$
+$$\chi^{ij}&#95;{kl} = \frac{\partial A^{ij}}{\partial S^{kl}}$$
 
 This is exactly the softmax Jacobian we derived for gradients!
 

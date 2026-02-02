@@ -8,9 +8,7 @@ generate_feeds = false
 build_search_index = true
 
 [markdown]
-highlight_code = true
-highlight_theme = "one-dark"
-extra_syntaxes_and_themes = []
+# Disable processing that interferes with math
 smart_punctuation = false
 render_emoji = false
 

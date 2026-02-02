@@ -69,7 +69,7 @@ Random edges ensure any two tokens are connected with high probability.
 
 For a mask $M^{ij} \in \{0, -\infty\}$:
 
-$$S^{ij}_{masked} = S^{ij} + M^{ij}$$
+$$S^{ij}&#95;{masked} = S^{ij} + M^{ij}$$
 
 The softmax naturally zeros out masked positions:
 

@@ -27,7 +27,7 @@ $$PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d}}\right)$$
 
 Simply learn a lookup table:
 
-$$X^{ia}_{\text{input}} = X^{ia}_{\text{token}} + P^{ia}$$
+$$X^{ia}&#95;{\text{input}} = X^{ia}&#95;{\text{token}} + P^{ia}$$
 
 where $P \in \mathbb{R}^{L_{max} \times d}$ is learned.
 
@@ -59,7 +59,7 @@ where $b_k$ is a learned bias for relative position $k$.
 
 Decompose attention into content and position terms:
 
-$$S^{ij} = \underbrace{Q^{ia} K^{ja}}_{\text{content-content}} + \underbrace{Q^{ia} R^{(i-j)a}}_{\text{content-position}} + \underbrace{u^a K^{ja}}_{\text{global content}} + \underbrace{v^a R^{(i-j)a}}_{\text{global position}}$$
+$$S^{ij} = \underbrace{Q^{ia} K^{ja}}&#95;{\text{content-content}} + \underbrace{Q^{ia} R^{(i-j)a}}&#95;{\text{content-position}} + \underbrace{u^a K^{ja}}&#95;{\text{global content}} + \underbrace{v^a R^{(i-j)a}}&#95;{\text{global position}}$$
 
 where:
 - $R^{ka}$: Relative position embeddings
