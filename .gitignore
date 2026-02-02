@@ -96,3 +96,4 @@ vale
 
 # Just binary (for testing)
 just
+node_modules/

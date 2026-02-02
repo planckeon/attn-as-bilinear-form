@@ -8,9 +8,6 @@ generate_feeds = false
 build_search_index = true
 
 [markdown]
-# Code highlighting - compatible with Zola 0.19+
-highlight_code = true
-highlight_theme = "base16-ocean-dark"
 # Disable processing that interferes with math
 smart_punctuation = false
 
