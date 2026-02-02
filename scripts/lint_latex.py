@@ -35,6 +35,20 @@ class LatexLinter:
                 'superscript'
             ),
         ]
+        
+        # Patterns that might cause Markdown/LaTeX conflicts
+        self.conflict_patterns = [
+            # Underscore followed by word chars (potential emphasis conflict)
+            (
+                r'(?<!\\)_[a-zA-Z]{2,}_(?![{])',
+                'Underscores around word may be interpreted as markdown emphasis: "{}"',
+            ),
+            # Asterisks that might be interpreted as emphasis
+            (
+                r'(?<!\\)\*[a-zA-Z]+\*(?![{])',
+                'Asterisks around word may be interpreted as markdown emphasis: "{}"',
+            ),
+        ]
 
     def _is_valid_subscript(self, word: str) -> bool:
         """Check if a subscript word is valid without \text{}."""
@@ -163,7 +177,7 @@ class LatexLinter:
     def print_errors(self):
         """Print all errors found."""
         if not self.errors:
-            print("✓ No LaTeX formatting errors found!")
+            print("[OK] No LaTeX formatting errors found!")
             return
         
         print(f"\n{'='*70}")
