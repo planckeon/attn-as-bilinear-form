@@ -11,7 +11,8 @@ build_search_index = true
 highlight_code = true
 highlight_theme = "one-dark"
 extra_syntaxes_and_themes = []
-smart_punctuation = true
+smart_punctuation = false
+render_emoji = false
 
 [extra]
 author = "planckeon labs"
