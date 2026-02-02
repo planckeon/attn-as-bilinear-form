@@ -37,7 +37,7 @@ All keys receive equal attention.
 
 As $\beta \to \infty$:
 
-$$A^{ij} \to \begin{cases} 1 & \text{if } j = \arg\max_{j'} S^{ij'} \\ 0 & \text{otherwise} \end{cases}$$
+$$A^{ij} \to \begin{cases} 1 & \text{if } j = \arg\max_{j'} S^{ij'} \\\\ 0 & \text{otherwise} \end{cases}$$
 
 Only the highest-scoring key receives attention.
 
@@ -183,7 +183,7 @@ Classical Hopfield fails when patterns have overlap (correlation). The error pro
 Modern Hopfield uses exponential separation:
 
 $$\text{softmax}(\beta x)_i \approx \begin{cases}
-1 & x_i = \max(x) \\
+1 & x_i = \max(x) \\\\
 e^{-\beta \Delta} & x_i = \max(x) - \Delta
 \end{cases}$$
 
@@ -205,25 +205,25 @@ For large $\beta$, even small separation $\Delta$ gives clean retrieval.
 
 **Setup:** Store 3 patterns as keys, retrieve closest to query.
 
-$$K = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 0.7 & 0.7 \end{pmatrix}, \quad q = \begin{pmatrix} 0.9 \\ 0.1 \end{pmatrix}$$
+$$K = \begin{pmatrix} 1 & 0 \\\\ 0 & 1 \\\\ 0.7 & 0.7 \end{pmatrix}, \quad q = \begin{pmatrix} 0.9 \\\\ 0.1 \end{pmatrix}$$
 
 **Step 1: Compute scores**
 
-$$s = K q = \begin{pmatrix} 0.9 \\ 0.1 \\ 0.7 \end{pmatrix}$$
+$$s = K q = \begin{pmatrix} 0.9 \\\\ 0.1 \\\\ 0.7 \end{pmatrix}$$
 
 **Step 2: Apply softmax** (with $\beta = 1$)
 
-$$a = \text{softmax}(s) \approx \begin{pmatrix} 0.48 \\ 0.22 \\ 0.30 \end{pmatrix}$$
+$$a = \text{softmax}(s) \approx \begin{pmatrix} 0.48 \\\\ 0.22 \\\\ 0.30 \end{pmatrix}$$
 
 **Step 3: Retrieve pattern**
 
-$$\xi^{new} = K^T a = \begin{pmatrix} 0.48 + 0.21 \\ 0.22 + 0.21 \end{pmatrix} = \begin{pmatrix} 0.69 \\ 0.43 \end{pmatrix}$$
+$$\xi^{new} = K^T a = \begin{pmatrix} 0.48 + 0.21 \\\\ 0.22 + 0.21 \end{pmatrix} = \begin{pmatrix} 0.69 \\\\ 0.43 \end{pmatrix}$$
 
 The query moved toward pattern 1 (which it was closest to).
 
 **With high temperature** ($\beta = 5$):
 
-$$a = \text{softmax}(5s) \approx \begin{pmatrix} 0.88 \\ 0.01 \\ 0.11 \end{pmatrix}$$
+$$a = \text{softmax}(5s) \approx \begin{pmatrix} 0.88 \\\\ 0.01 \\\\ 0.11 \end{pmatrix}$$
 
 Now retrieval is sharper—almost pure pattern 1.
 

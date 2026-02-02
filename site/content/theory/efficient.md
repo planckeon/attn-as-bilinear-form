@@ -18,7 +18,7 @@ For long sequences ($n > 10000$), this becomes prohibitive.
 Only attend to tokens within a fixed window:
 
 $$M^{ij} = \begin{cases}
-0 & \text{if } |i - j| \leq w \\
+0 & \text{if } |i - j| \leq w \\\\
 -\infty & \text{otherwise}
 \end{cases}$$
 
@@ -29,7 +29,7 @@ $$M^{ij} = \begin{cases}
 Attend to every $k$-th token:
 
 $$M^{ij} = \begin{cases}
-0 & \text{if } j \mod k = 0 \\
+0 & \text{if } j \mod k = 0 \\\\
 -\infty & \text{otherwise}
 \end{cases}$$
 

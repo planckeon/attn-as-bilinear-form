@@ -122,7 +122,7 @@ Let's compute attention scores step-by-step with a tiny example.
 
 **Step 1: Write out the metric tensor**
 
-$$g_{ab} = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$$
+$$g_{ab} = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 1 \end{pmatrix}$$
 
 **Step 2: Compute the bilinear form**
 

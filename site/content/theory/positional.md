@@ -111,10 +111,10 @@ $$\text{Im}[f(q,m)] = q_1 \sin m\theta + q_2 \cos m\theta$$
 For $d$-dimensional vectors, apply 2D rotations to pairs:
 
 $$R_m = \begin{pmatrix}
-\cos m\theta_1 & -\sin m\theta_1 & & & \\
-\sin m\theta_1 & \cos m\theta_1 & & & \\
-& & \cos m\theta_2 & -\sin m\theta_2 & \\
-& & \sin m\theta_2 & \cos m\theta_2 & \\
+\cos m\theta_1 & -\sin m\theta_1 & & & \\\\
+\sin m\theta_1 & \cos m\theta_1 & & & \\\\
+& & \cos m\theta_2 & -\sin m\theta_2 & \\\\
+& & \sin m\theta_2 & \cos m\theta_2 & \\\\
 & & & & \ddots
 \end{pmatrix}$$
 
