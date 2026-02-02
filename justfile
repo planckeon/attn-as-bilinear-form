@@ -138,6 +138,12 @@ fix-math:
     python3 scripts/fix_math_underscores.py \
         $(find site/content -name "*.md" -type f)
 
+# Fix LaTeX escaping (matrix newlines, underscores)
+fix-latex:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 scripts/fix_latex_escapes.py site/content/
+
 # Build the Zola site
 build:
     cd site && zola build
