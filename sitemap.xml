@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/attention/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/bilinear/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/efficient/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/einsum/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/gradients/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/multihead/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/positional/</loc>
+    </url>
+    <url>
+        <loc>https://planckeon.github.io/attn-as-bilinear-form/theory/statistical/</loc>
+    </url>
+</urlset>

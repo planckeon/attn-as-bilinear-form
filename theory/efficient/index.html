@@ -1,0 +1,65 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1" name=viewport><title>Efficient Attention | Attention as Bilinear Form</title><meta content="A Physicist's Guide to Transformer Attention" name=description><link href=https://planckeon.github.io/attn-as-bilinear-form/style.css rel=stylesheet><link href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css rel=stylesheet><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js></script><script onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });" defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js></script><body><header><nav><a class=logo href=https://planckeon.github.io/attn-as-bilinear-form> <span class=logo-icon>∑</span> <span class=logo-text>Attention as Bilinear Form</span> </a><div class=nav-links><a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>GitHub</a></div></nav></header><main><article class="content page"><h1>Efficient Attention</h1><h2 id=the-quadratic-problem>The Quadratic Problem</h2><p>Standard attention has:<ul><li><strong>Time complexity:</strong> $O(n^2 d)$<li><strong>Memory complexity:</strong> $O(n^2)$ (storing attention matrix)</ul><p>For long sequences ($n > 10000$), this becomes prohibitive.<h2 id=sparse-attention-patterns>Sparse Attention Patterns</h2><h3 id=local-window-attention>Local Window Attention</h3><p>Only attend to tokens within a fixed window:<p>$$M^{ij} = \begin{cases} 0 & \text{if } |i - j| \leq w \\ -\infty & \text{otherwise} \end{cases}$$<p><strong>Complexity:</strong> $O(nwd)$ time, $O(nw)$ memory<h3 id=strided-attention>Strided Attention</h3><p>Attend to every $k$-th token:<p>$$M^{ij} = \begin{cases} 0 & \text{if } j \mod k = 0 \\ -\infty & \text{otherwise} \end{cases}$$<p>Combines with local attention for global receptive field.<h3 id=block-sparse-attention>Block-Sparse Attention</h3><p>Divide sequence into blocks, attend within and across select blocks:<pre><code>Block pattern:
+[■ ■ □ □ ■]    ■ = attend
+[■ ■ ■ □ □]    □ = mask
+[□ ■ ■ ■ □]
+[□ □ ■ ■ ■]
+[■ □ □ ■ ■]
+</code></pre><h3 id=longformer-pattern>Longformer Pattern</h3><p>Combine local attention with global tokens:<p>$$A^{ij} = \text{local}(i, j) + \text{global}(i) + \text{global}(j)$$<ul><li><strong>Local:</strong> Sliding window of size $w$<li><strong>Global:</strong> Selected tokens (e.g., [CLS]) attend to/from all positions</ul><h3 id=bigbird-pattern>BigBird Pattern</h3><p>Longformer + random attention:<p>$$A = A_{local} + A_{global} + A_{random}$$<p>Random edges ensure any two tokens are connected with high probability.<h2 id=sparse-attention-in-index-notation>Sparse Attention in Index Notation</h2><p>For a mask $M^{ij} \in {0, -\infty}$:<p>$$S^{ij}_{masked} = S^{ij} + M^{ij}$$<p>The softmax naturally zeros out masked positions:<p>$$A^{ij} = \frac{\exp(S^{ij} + M^{ij})}{\sum_{j'} \exp(S^{ij'} + M^{ij'})}$$<p>When $M^{ij} = -\infty$, the term vanishes.<h2 id=flash-attention>Flash Attention</h2><h3 id=the-memory-bottleneck>The Memory Bottleneck</h3><p>Standard attention:<ol><li>Compute $S = QK^T/\sqrt{d_k}$ → Store $O(n^2)$<li>Compute $A = \text{softmax}(S)$ → Store $O(n^2)$<li>Compute $O = AV$ → Store $O(nd)$</ol><p>The $n^2$ intermediate storage limits sequence length.<h3 id=key-insight-online-softmax>Key Insight: Online Softmax</h3><p>Softmax can be computed incrementally:<p>$$\text{softmax}(x_1, \ldots, x_n) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$<p><strong>Online algorithm:</strong><ol><li>Maintain running max $m$ and sum of exponentials $\ell$<li>Process blocks, updating $m$ and $\ell$<li>Correct for max changes using: $e^{x - m_{new}} = e^{x - m_{old}} \cdot e^{m_{old} - m_{new}}$</ol><h3 id=block-wise-computation>Block-wise Computation</h3><p>Divide $Q, K, V$ into blocks of size $B$:<p>$$Q = [Q_1, Q_2, \ldots, Q_{n/B}]$$<p>For each query block $Q_i$:<ol><li>Initialize output $O_i = 0$, log-sum-exp $\ell_i = -\infty$<li>For each key-value block $(K_j, V_j)$: <ul><li>Compute block scores $S_{ij} = Q_i K_j^T / \sqrt{d_k}$<li>Update running softmax statistics<li>Accumulate contribution to $O_i$</ul></ol><h3 id=algorithm-pseudocode>Algorithm Pseudocode</h3><pre><code data-lang=python>def flash_attention(Q, K, V, block_size=64):
+    n, d = Q.shape
+    O = zeros_like(Q)
+    
+    for i in range(0, n, block_size):
+        Q_block = Q[i:i+block_size]
+        m_i = full(-inf, block_size)  # running max
+        l_i = zeros(block_size)        # running sum
+        O_i = zeros((block_size, d))
+        
+        for j in range(0, n, block_size):
+            K_block = K[j:j+block_size]
+            V_block = V[j:j+block_size]
+            
+            # Compute block attention scores
+            S_ij = Q_block @ K_block.T / sqrt(d)
+            
+            # Update running max
+            m_ij = max(S_ij, axis=-1)
+            m_new = maximum(m_i, m_ij)
+            
+            # Rescale previous contributions
+            alpha = exp(m_i - m_new)
+            beta = exp(m_ij - m_new)
+            
+            # Update running sum and output
+            l_i = alpha * l_i + beta * sum(exp(S_ij - m_ij), axis=-1)
+            O_i = alpha * O_i + beta * exp(S_ij - m_ij) @ V_block
+            m_i = m_new
+        
+        O[i:i+block_size] = O_i / l_i
+    
+    return O
+</code></pre><h3 id=backward-pass>Backward Pass</h3><p>Key insight: Don't store attention matrix! Recompute during backward.<p><strong>Forward:</strong> Store only $O$, $\ell$ (log-sum-exp), $m$ (max)<p><strong>Backward:</strong> Recompute $S$ and $A$ block-by-block while computing gradients.<h3 id=gradient-computation>Gradient Computation</h3><p>Standard gradient through softmax:<p>$$\frac{\partial L}{\partial S^{ij}} = A^{ij} \left( \frac{\partial L}{\partial A^{ij}} - \sum_{j'} A^{ij'} \frac{\partial L}{\partial A^{ij'}} \right)$$<p>Define $D^i = \sum_j A^{ij} \frac{\partial L}{\partial A^{ij}}$ (computed as $O \odot dO$ summed).<p>Then:<p>$$\frac{\partial L}{\partial S^{ij}} = A^{ij} (dA^{ij} - D^i)$$<p>Block-wise:<p>$$dS_{ij} = A_{ij} \odot (dA_{ij} - D_i)$$ $$dQ_i = \sum_j dS_{ij} K_j / \sqrt{d_k}$$ $$dK_j = \sum_i dS_{ij}^T Q_i / \sqrt{d_k}$$ $$dV_j = \sum_i A_{ij}^T dO_i$$<h3 id=complexity-analysis>Complexity Analysis</h3><table><thead><tr><th>Method<th>Time<th>Memory<th>IO<tbody><tr><td>Standard<td>$O(n^2 d)$<td>$O(n^2)$<td>$O(n^2 + nd)$<tr><td>Flash<td>$O(n^2 d)$<td>$O(n)$<td>$O(n^2 d / M)$</table><p>where $M$ is SRAM size.<p>Flash Attention is <strong>IO-aware</strong>: minimizes data movement between GPU SRAM and HBM.<h2 id=linear-attention>Linear Attention</h2><h3 id=kernel-trick>Kernel Trick</h3><p>Standard attention:<p>$$O_i = \frac{\sum_j \exp(q_i^T k_j) v_j}{\sum_j \exp(q_i^T k_j)}$$<p>If we approximate $\exp(q^T k) \approx \phi(q)^T \phi(k)$:<p>$$O_i = \frac{\sum_j \phi(q_i)^T \phi(k_j) v_j}{\sum_j \phi(q_i)^T \phi(k_j)}$$<p>$$= \frac{\phi(q_i)^T \sum_j \phi(k_j) v_j^T}{\phi(q_i)^T \sum_j \phi(k_j)}$$<h3 id=complexity>Complexity</h3><p>Precompute:<ul><li>$KV = \sum_j \phi(k_j) v_j^T$ — shape $(d_\phi, d_v)$<li>$K_{sum} = \sum_j \phi(k_j)$ — shape $(d_\phi,)$</ul><p>Then each query costs $O(d_\phi d)$ instead of $O(nd)$.<p><strong>Total:</strong> $O(n d_\phi d)$ — linear in sequence length!<h3 id=feature-maps>Feature Maps</h3><p>Common choices for $\phi$:<ol><li><p><strong>Random Fourier Features:</strong> $$\phi(x) = \exp(Wx) / \sqrt{d}$$</p><li><p><strong>ELU + 1:</strong> $$\phi(x) = \text{ELU}(x) + 1$$</p><li><p><strong>Positive Random Features (Performers):</strong> $$\phi(x) = \exp\left(x^T \omega - \frac{|x|^2}{2}\right)$$</p></ol><h3 id=causal-linear-attention>Causal Linear Attention</h3><p>For autoregressive models, accumulate incrementally:<p>$$KV_i = KV_{i-1} + \phi(k_i) v_i^T$$ $$O_i = \frac{\phi(q_i)^T KV_i}{\phi(q_i)^T K_{sum,i}}$$<p>This is an RNN! Hidden state is $(KV, K_{sum})$.<h2 id=multi-query-and-grouped-query-attention>Multi-Query and Grouped-Query Attention</h2><h3 id=multi-query-attention-mqa>Multi-Query Attention (MQA)</h3><p>Share keys and values across all heads:<p>$$Q^{hia}: \text{per-head}$$ $$K^{ja}, V^{jb}: \text{shared across heads}$$<p><strong>Savings:</strong> Parameters and KV-cache reduced by factor of $H$.<h3 id=grouped-query-attention-gqa>Grouped-Query Attention (GQA)</h3><p>Compromise: Group heads, share K/V within groups.<p>With $G$ groups and $H$ heads:<ul><li>Each group has $H/G$ heads<li>Each group shares one K and one V</ul><p><strong>GQA-1 = MQA, GQA-H = MHA</strong><h2 id=code-example>Code Example</h2><pre><code data-lang=python>from attn_tensors.efficient import (
+    flash_attention,
+    linear_attention,
+    local_attention,
+    create_local_mask,
+    create_strided_mask,
+)
+
+# Standard attention (for comparison)
+O_standard = scaled_dot_product_attention(Q, K, V)
+
+# Flash attention
+O_flash = flash_attention(Q, K, V, block_size=64)
+
+# Linear attention with ELU features
+O_linear = linear_attention(Q, K, V, feature_map='elu')
+
+# Local window attention
+mask = create_local_mask(seq_len, window_size=128)
+O_local = scaled_dot_product_attention(Q, K, V, mask=mask)
+</code></pre><h2 id=when-to-use-what>When to Use What</h2><table><thead><tr><th>Method<th>Best For<th>Tradeoff<tbody><tr><td>Standard<td>Short sequences (&lt;512)<td>Simple, exact<tr><td>Flash<td>Medium sequences (512-8K)<td>Exact, memory efficient<tr><td>Sparse<td>Long sequences (8K+)<td>Approximate, task-dependent<tr><td>Linear<td>Very long sequences<td>Approximate, loses expressivity<tr><td>MQA/GQA<td>Inference<td>Reduced KV-cache</table></article></main><footer><p>Built with <a href=https://www.getzola.org/ rel=noopener target=_blank>Zola</a> · <a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>Source on GitHub</a></footer>

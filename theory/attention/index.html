@@ -1,0 +1,23 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1" name=viewport><title>Attention Mechanism | Attention as Bilinear Form</title><meta content="A Physicist's Guide to Transformer Attention" name=description><link href=https://planckeon.github.io/attn-as-bilinear-form/style.css rel=stylesheet><link href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css rel=stylesheet><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js></script><script onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });" defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js></script><body><header><nav><a class=logo href=https://planckeon.github.io/attn-as-bilinear-form> <span class=logo-icon>∑</span> <span class=logo-text>Attention as Bilinear Form</span> </a><div class=nav-links><a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>GitHub</a></div></nav></header><main><article class="content page"><h1>Attention Mechanism</h1><h2 id=the-attention-formula>The Attention Formula</h2><p>The scaled dot-product attention from "Attention Is All You Need":<p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$<p>Let's decompose this in index notation.<h2 id=step-by-step-breakdown>Step-by-Step Breakdown</h2><h3 id=step-1-score-computation>Step 1: Score Computation</h3><p>$$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja}$$<ul><li>$Q^{ia}$: Query at position $i$, feature dimension $a$<li>$K^{ja}$: Key at position $j$, feature dimension $a$<li>Contraction over $a$ gives similarity between query $i$ and key $j$</ul><h3 id=step-2-softmax-normalization>Step 2: Softmax Normalization</h3><p>$$A^{ij} = \frac{\exp(S^{ij})}{\sum_{j'} \exp(S^{ij'})}$$<ul><li>Normalizes along the key dimension for each query<li>$A^{ij}$ is the attention weight from query $i$ to key $j$<li>Each row sums to 1: $\sum_j A^{ij} = 1$</ul><h3 id=step-3-value-aggregation>Step 3: Value Aggregation</h3><p>$$O^{ib} = A^{ij} V^{jb}$$<ul><li>$V^{jb}$: Value at position $j$, feature dimension $b$<li>Weighted sum of values based on attention weights<li>Output $O^{ib}$ has same shape as queries: $(n_q, d_v)$</ul><h2 id=tensor-shapes>Tensor Shapes</h2><table><thead><tr><th>Tensor<th>Shape<th>Indices<tbody><tr><td>Queries $Q$<td>$(n_q, d_k)$<td>$Q^{ia}$<tr><td>Keys $K$<td>$(n_k, d_k)$<td>$K^{ja}$<tr><td>Values $V$<td>$(n_k, d_v)$<td>$V^{jb}$<tr><td>Scores $S$<td>$(n_q, n_k)$<td>$S^{ij}$<tr><td>Attention $A$<td>$(n_q, n_k)$<td>$A^{ij}$<tr><td>Output $O$<td>$(n_q, d_v)$<td>$O^{ib}$</table><h2 id=self-attention-vs-cross-attention>Self-Attention vs Cross-Attention</h2><p><strong>Self-attention</strong>: $Q$, $K$, $V$ all come from the same sequence<ul><li>$n_q = n_k$, typically denoted just $n$</ul><p><strong>Cross-attention</strong>: $Q$ from one sequence, $K$, $V$ from another<ul><li>$n_q \neq n_k$ in general<li>Example: decoder attending to encoder outputs</ul><h2 id=causal-masked-attention>Causal (Masked) Attention</h2><p>For autoregressive models, we mask future positions:<p>$$S^{ij}_{\text{masked}} = \begin{cases} S^{ij} & \text{if } j \leq i \\ -\infty & \text{if } j > i \end{cases}$$<p>This ensures each position can only attend to earlier positions.<h2 id=multi-head-attention>Multi-Head Attention</h2><p>Introduce a head index $h$:<p>$$Q^{hia} = X^{ib} W_Q^{hba}$$ $$K^{hja} = X^{jb} W_K^{hba}$$ $$V^{hjb} = X^{jc} W_V^{hcb}$$<p>Each head computes attention independently:<p>$$O^{hib} = A^{hij} V^{hjb}$$<p>Then concatenate and project:<p>$$\text{Output}^{ic} = O^{hib} W_O^{hbc}$$<h2 id=code-example>Code Example</h2><pre><code data-lang=python>from attn_tensors import scaled_dot_product_attention
+from attn_tensors.multihead import multihead_attention
+
+# Single-head attention
+Q = jnp.randn(10, 64)  # 10 queries, 64 dims
+K = jnp.randn(20, 64)  # 20 keys
+V = jnp.randn(20, 64)  # 20 values
+
+output = scaled_dot_product_attention(Q, K, V)
+# output.shape = (10, 64)
+
+# Get attention weights too
+output, weights = scaled_dot_product_attention(Q, K, V, return_weights=True)
+# weights.shape = (10, 20)
+
+# Multi-head attention
+output = multihead_attention(Q, K, V, num_heads=8)
+</code></pre></article></main><footer><p>Built with <a href=https://www.getzola.org/ rel=noopener target=_blank>Zola</a> · <a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>Source on GitHub</a></footer>

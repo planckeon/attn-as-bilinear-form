@@ -1,0 +1,52 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1" name=viewport><title>Gradient Derivations | Attention as Bilinear Form</title><meta content="A Physicist's Guide to Transformer Attention" name=description><link href=https://planckeon.github.io/attn-as-bilinear-form/style.css rel=stylesheet><link href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css rel=stylesheet><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js></script><script onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });" defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js></script><body><header><nav><a class=logo href=https://planckeon.github.io/attn-as-bilinear-form> <span class=logo-icon>∑</span> <span class=logo-text>Attention as Bilinear Form</span> </a><div class=nav-links><a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>GitHub</a></div></nav></header><main><article class="content page"><h1>Gradient Derivations</h1><h2 id=chain-rule-in-index-notation>Chain Rule in Index Notation</h2><p>For backpropagation, we need gradients of the loss $L$ with respect to parameters.<p>Using the chain rule:<p>$$\frac{\partial L}{\partial x^j} = \frac{\partial L}{\partial y^i} \frac{\partial y^i}{\partial x^j}$$<p>Note the sum over the intermediate index $i$.<h2 id=full-backward-pass>Full Backward Pass</h2><p>The attention forward pass is:<p>$$S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja}$$ $$A^{ij} = \text{softmax}_j(S^{ij})$$ $$O^{ib} = A^{ij} V^{jb}$$<p>For the backward pass, we propagate gradients in reverse order.<h3 id=gradient-w-r-t-values>Gradient w.r.t. Values</h3><p>Given: $O^{ib} = A^{ij} V^{jb}$<p>$$\frac{\partial O^{ib}}{\partial V^{mn}} = A^{ij} \delta^j_m \delta^b_n = A^{im} \delta^b_n$$<p>Therefore:<p>$$\frac{\partial L}{\partial V^{mn}} = \frac{\partial L}{\partial O^{ib}} A^{im} \delta^b_n = A^{im} \frac{\partial L}{\partial O^{in}}$$<p><strong>Matrix form</strong>: $\frac{\partial L}{\partial V} = A^T \frac{\partial L}{\partial O}$<h3 id=gradient-w-r-t-attention-weights>Gradient w.r.t. Attention Weights</h3><p>$$\frac{\partial O^{ib}}{\partial A^{mn}} = \delta^i_m V^{nb}$$<p>Therefore:<p>$$\frac{\partial L}{\partial A^{mn}} = \frac{\partial L}{\partial O^{mb}} V^{nb}$$<p><strong>Matrix form</strong>: $\frac{\partial L}{\partial A} = \frac{\partial L}{\partial O} V^T$<h3 id=gradient-through-softmax>Gradient Through Softmax</h3><p>This is the trickiest part. For softmax $A^{ij} = \text{softmax}_j(S^{ij})$:<p>$$\frac{\partial A^{ij}}{\partial S^{mn}} = \delta^i_m A^{ij} (\delta^j_n - A^{in})$$<p>Chain rule gives:<p>$$\frac{\partial L}{\partial S^{ij}} = A^{ij} \left( \frac{\partial L}{\partial A^{ij}} - \sum_{j'} A^{ij'} \frac{\partial L}{\partial A^{ij'}} \right)$$<p><strong>Intuition</strong>: The gradient through softmax involves:<ol><li>The local gradient at position $(i,j)$<li>Minus the weighted average of gradients (the normalization effect)</ol><h3 id=gradient-w-r-t-queries>Gradient w.r.t. Queries</h3><p>Given: $S^{ij} = \frac{1}{\sqrt{d_k}} Q^{ia} K^{ja}$<p>$$\frac{\partial S^{ij}}{\partial Q^{kl}} = \frac{1}{\sqrt{d_k}} \delta^i_k \delta^a_l K^{ja} = \frac{1}{\sqrt{d_k}} \delta^i_k K^{jl}$$<p>Therefore:<p>$$\frac{\partial L}{\partial Q^{kl}} = \frac{1}{\sqrt{d_k}} \frac{\partial L}{\partial S^{kj}} K^{jl}$$<p><strong>Matrix form</strong>: $\frac{\partial L}{\partial Q} = \frac{1}{\sqrt{d_k}} \frac{\partial L}{\partial S} K$<h3 id=gradient-w-r-t-keys>Gradient w.r.t. Keys</h3><p>Similarly:<p>$$\frac{\partial L}{\partial K^{kl}} = \frac{1}{\sqrt{d_k}} \frac{\partial L}{\partial S^{ik}} Q^{il}$$<p><strong>Matrix form</strong>: $\frac{\partial L}{\partial K} = \frac{1}{\sqrt{d_k}} \left(\frac{\partial L}{\partial S}\right)^T Q$<h2 id=summary-of-backward-pass>Summary of Backward Pass</h2><p>Given upstream gradient $\frac{\partial L}{\partial O}$:<ol><li><strong>dL/dV</strong> = $A^T \cdot \frac{\partial L}{\partial O}$<li><strong>dL/dA</strong> = $\frac{\partial L}{\partial O} \cdot V^T$<li><strong>dL/dS</strong> = $A \odot \left(\frac{\partial L}{\partial A} - \text{rowsum}(A \odot \frac{\partial L}{\partial A})\right)$<li><strong>dL/dQ</strong> = $\frac{1}{\sqrt{d_k}} \frac{\partial L}{\partial S} \cdot K$<li><strong>dL/dK</strong> = $\frac{1}{\sqrt{d_k}} \left(\frac{\partial L}{\partial S}\right)^T \cdot Q$</ol><h2 id=verification>Verification</h2><p>All manual gradients can be verified against JAX autodiff:<pre><code data-lang=python>from attn_tensors.gradients import verify_gradients
+
+Q = jnp.randn(10, 64)
+K = jnp.randn(20, 64)
+V = jnp.randn(20, 64)
+
+results = verify_gradients(Q, K, V)
+print(results)
+# {'dL_dQ': True, 'dL_dK': True, 'dL_dV': True, 'all_correct': True}
+</code></pre><h2 id=why-manual-gradients>Why Manual Gradients?</h2><ol><li><strong>Education</strong>: Understanding the math behind autodiff<li><strong>Debugging</strong>: Verify your understanding is correct<li><strong>Optimization</strong>: Sometimes manual gradients enable tricks (e.g., Flash Attention)<li><strong>Insight</strong>: See gradient flow and potential issues (vanishing/exploding)</ol><h2 id=deriving-the-softmax-jacobian>Deriving the Softmax Jacobian</h2><p>The softmax Jacobian is crucial for understanding gradient flow. Let's derive it carefully.<h3 id=setup>Setup</h3><p>Given scores $S = [s_1, \ldots, s_n]$, the softmax outputs are:<p>$$a_i = \frac{e^{s_i}}{\sum_k e^{s_k}} = \frac{e^{s_i}}{Z}$$<p>We want $\frac{\partial a_i}{\partial s_j}$.<h3 id=case-1-i-j-diagonal-elements>Case 1: $i = j$ (Diagonal elements)</h3><p>Using the quotient rule:<p>$$\frac{\partial a_i}{\partial s_i} = \frac{e^{s_i} \cdot Z - e^{s_i} \cdot e^{s_i}}{Z^2} = \frac{e^{s_i}}{Z} - \frac{e^{2s_i}}{Z^2}$$<p>$$= a_i - a_i^2 = a_i(1 - a_i)$$<h3 id=case-2-i-neq-j-off-diagonal-elements>Case 2: $i \neq j$ (Off-diagonal elements)</h3><p>$$\frac{\partial a_i}{\partial s_j} = \frac{0 \cdot Z - e^{s_i} \cdot e^{s_j}}{Z^2} = -\frac{e^{s_i} e^{s_j}}{Z^2}$$<p>$$= -a_i a_j$$<h3 id=combined-formula>Combined Formula</h3><p>$$\frac{\partial a_i}{\partial s_j} = a_i(\delta_{ij} - a_j)$$<p>Or in matrix form:<p>$$\frac{\partial A}{\partial S} = \text{diag}(a) - a a^T$$<h3 id=in-index-notation-with-batch-dimension>In Index Notation with Batch Dimension</h3><p>For attention matrix $A^{ij}$ (query $i$, key $j$):<p>$$\frac{\partial A^{ij}}{\partial S^{mn}} = \delta^i_m A^{ij}(\delta^j_n - A^{in})$$<p>The $\delta^i_m$ enforces that softmax is independent across queries.<h2 id=gradient-flow-analysis>Gradient Flow Analysis</h2><h3 id=vanishing-gradients-in-sharp-attention>Vanishing Gradients in Sharp Attention</h3><p>When attention is very peaked ($A^{ij} \approx 1$ for one $j$, 0 elsewhere):<p>$$\frac{\partial L}{\partial S^{ij}} = A^{ij}(\bar{A}^{ij} - \sum_{j'} A^{ij'}\bar{A}^{ij'})$$<p>If $A^{ij} \approx 1$ and $A^{ij'} \approx 0$ for $j' \neq j$:<p>$$\frac{\partial L}{\partial S^{ij}} \approx 1 \cdot (\bar{A}^{ij} - \bar{A}^{ij}) = 0$$<p>The gradient vanishes! This is the "hard attention" problem.<h3 id=temperature-scaling-for-better-gradients>Temperature Scaling for Better Gradients</h3><p>Using temperature $\tau$:<p>$$A^{ij} = \text{softmax}(S^{ij}/\tau)$$<p>Higher $\tau$ → softer attention → better gradient flow.<h2 id=numerical-stability>Numerical Stability</h2><h3 id=log-sum-exp-trick>Log-Sum-Exp Trick</h3><p>Computing softmax naively:<pre><code data-lang=python>exp_s = exp(s)  # Can overflow!
+a = exp_s / sum(exp_s)
+</code></pre><p>Stable version:<pre><code data-lang=python>s_max = max(s)
+exp_s = exp(s - s_max)  # Subtract max for stability
+a = exp_s / sum(exp_s)
+</code></pre><h3 id=gradient-with-numerical-stability>Gradient with Numerical Stability</h3><p>The gradient $\frac{\partial L}{\partial S} = A \odot (\bar{A} - \text{rowsum}(A \odot \bar{A}))$ is already stable because:<ul><li>$A$ is normalized (no overflow)<li>Operations are on bounded quantities</ul><h2 id=complete-backward-pass-algorithm>Complete Backward Pass Algorithm</h2><pre><code data-lang=python>def attention_backward(dL_dO, Q, K, V, A):
+    """
+    Args:
+        dL_dO: Gradient w.r.t. output, shape (n_q, d_v)
+        Q, K, V: Forward pass inputs
+        A: Attention weights from forward pass
+    
+    Returns:
+        dL_dQ, dL_dK, dL_dV
+    """
+    d_k = Q.shape[-1]
+    scale = 1.0 / sqrt(d_k)
+    
+    # Step 1: Gradient w.r.t. Values
+    # O = A @ V, so dL_dV = A.T @ dL_dO
+    dL_dV = A.T @ dL_dO
+    
+    # Step 2: Gradient w.r.t. Attention weights
+    # O = A @ V, so dL_dA = dL_dO @ V.T
+    dL_dA = dL_dO @ V.T
+    
+    # Step 3: Gradient through softmax
+    # dL_dS = A * (dL_dA - sum(A * dL_dA, axis=-1, keepdims=True))
+    sum_term = (A * dL_dA).sum(axis=-1, keepdims=True)
+    dL_dS = A * (dL_dA - sum_term)
+    
+    # Step 4: Gradient w.r.t. Queries and Keys
+    # S = scale * Q @ K.T
+    dL_dQ = scale * dL_dS @ K
+    dL_dK = scale * dL_dS.T @ Q
+    
+    return dL_dQ, dL_dK, dL_dV
+</code></pre></article></main><footer><p>Built with <a href=https://www.getzola.org/ rel=noopener target=_blank>Zola</a> · <a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>Source on GitHub</a></footer>

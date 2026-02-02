@@ -1,0 +1,98 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# uv
+.uv/
+uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Jupyter/Marimo
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.marimo/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# Distribution
+*.manifest
+*.spec
+
+# Logs
+*.log
+pip-log.txt
+
+# Local development
+.env
+.env.local
+*.local
+
+# Compiled Typst (keep post.pdf in repo as artifact)
+# Uncomment if you want to ignore PDF:
+# *.pdf
+.hypothesis/
+
+# Zola
+site/public/
+
+# Vale styles (synced from packages)
+.vale/styles/
+
+# Vale binary (downloaded for linting)
+vale
+
+# Just binary (for testing)
+just

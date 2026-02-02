@@ -1,0 +1,90 @@
+name: MLX Tests (Apple Silicon)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  test-mlx:
+    name: Python ${{ matrix.python-version }} + MLX
+    # macos-14 runs on Apple Silicon (M1)
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies with MLX
+        run: |
+          uv sync --dev
+          uv pip install -e ".[mlx,dev]"
+
+      - name: Verify MLX is available
+        run: |
+          uv run python -c "import mlx.core as mx; print(f'MLX version: {mx.__version__}'); print(f'MLX device: {mx.default_device()}')"
+
+      - name: Run tests with MLX backend
+        run: |
+          uv run pytest tests/ \
+            --cov=attn_tensors \
+            --cov-report=term-missing \
+            -v \
+            --ignore=tests/test_benchmarks.py \
+            -m "not slow"
+
+      - name: Run MLX-specific tests
+        run: |
+          uv run pytest tests/ -v -k "mlx" --ignore=tests/test_benchmarks.py || true
+
+  benchmark-mlx:
+    name: MLX Benchmarks
+    runs-on: macos-14
+    needs: test-mlx
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies with MLX
+        run: |
+          uv sync --dev
+          uv pip install -e ".[mlx,dev]"
+
+      - name: Run benchmarks
+        run: |
+          uv run pytest tests/test_benchmarks.py \
+            -v \
+            --benchmark-only \
+            --benchmark-json=benchmark-results.json \
+            --timeout=300 || true
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlx-benchmark-results
+          path: benchmark-results.json
+        if: always()

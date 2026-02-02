@@ -1,0 +1,115 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1" name=viewport><title>Einstein Summation and Einsum | Attention as Bilinear Form</title><meta content="A Physicist's Guide to Transformer Attention" name=description><link href=https://planckeon.github.io/attn-as-bilinear-form/style.css rel=stylesheet><link href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css rel=stylesheet><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js></script><script onload="renderMathInElement(document.body, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ]
+        });" defer src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js></script><body><header><nav><a class=logo href=https://planckeon.github.io/attn-as-bilinear-form> <span class=logo-icon>∑</span> <span class=logo-text>Attention as Bilinear Form</span> </a><div class=nav-links><a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>GitHub</a></div></nav></header><main><article class="content page"><h1>Einstein Summation and Einsum</h1><h2 id=what-is-einsum>What is Einsum?</h2><p><strong>Einstein summation notation</strong> (einsum) is a compact notation for expressing tensor operations. First introduced by Albert Einstein for tensor calculus in physics, it has become a powerful tool for implementing attention mechanisms.<p>The core idea: <strong>repeated indices are summed over</strong>.<p>$$C^{ik} = A^{ij} B^{jk} \quad \Leftrightarrow \quad C_{ik} = \sum_j A_{ij} B_{jk}$$<p>In code, this becomes:<pre><code data-lang=python>C = jnp.einsum('ij,jk->ik', A, B)  # Matrix multiplication
+</code></pre><h2 id=why-learn-einsum>Why Learn Einsum?</h2><ol><li><strong>Self-documenting</strong>: The string <code>'ij,jk->ik'</code> tells you exactly what dimensions are involved<li><strong>Efficient</strong>: Avoids intermediate arrays and unnecessary reshaping<li><strong>Universal</strong>: Same notation in NumPy, JAX, PyTorch, TensorFlow<li><strong>Direct mapping</strong>: Index notation in math → einsum in code</ol><blockquote><p>"To become a true shape rotator, one must master einsum." — <a href=https://sankalp.bearblog.dev/einsum-new/ rel=external>Sankalp's blog</a></blockquote><h2 id=the-einsum-grammar>The Einsum Grammar</h2><pre><code>'input_indices -> output_indices'
+</code></pre><p><strong>Input specification</strong> (left of <code>→</code>):<ul><li>Comma-separated index labels for each input tensor<li>Each index corresponds to one axis of the tensor</ul><p><strong>Output specification</strong> (right of <code>→</code>):<ul><li>Indices that appear in the output<li>Order determines output shape</ul><p><strong>Key rules:</strong><table><thead><tr><th>Rule<th>Meaning<tbody><tr><td>Repeated indices<td>Multiply along that axis<tr><td>Index not in output<td>Sum over that axis<tr><td>Rearranged output<td>Transpose/reshape</table><h2 id=basic-examples>Basic Examples</h2><h3 id=sum-of-all-elements>Sum of all elements</h3><p>$$S = \sum_{i,j} A_{ij}$$<pre><code data-lang=python>S = jnp.einsum('ij->', A)  # Omit both → sum both
+</code></pre><h3 id=transpose>Transpose</h3><p>$$B_{ji} = A_{ij}$$<pre><code data-lang=python>B = jnp.einsum('ij->ji', A)  # Rearrange indices
+</code></pre><h3 id=trace-sum-of-diagonal>Trace (sum of diagonal)</h3><p>$$\text{tr}(A) = \sum_i A_{ii}$$<pre><code data-lang=python>trace = jnp.einsum('ii->', A)  # Same index → diagonal
+</code></pre><h3 id=matrix-vector-multiplication>Matrix-vector multiplication</h3><p>$$y_i = \sum_j A_{ij} x_j$$<pre><code data-lang=python>y = jnp.einsum('ij,j->i', A, x)
+</code></pre><h3 id=matrix-multiplication>Matrix multiplication</h3><p>$$C_{ik} = \sum_j A_{ij} B_{jk}$$<pre><code data-lang=python>C = jnp.einsum('ij,jk->ik', A, B)
+</code></pre><h3 id=batch-matrix-multiplication>Batch matrix multiplication</h3><p>$$C_{bij} = \sum_k A_{bik} B_{bkj}$$<pre><code data-lang=python>C = jnp.einsum('bik,bkj->bij', A, B)
+</code></pre><h2 id=understanding-summation-indices>Understanding Summation Indices</h2><p>Indices are partitioned into two types:<ul><li><strong>Free indices</strong>: Appear in output → outer loops<li><strong>Summation indices</strong>: Not in output → summed (inner loops)</ul><p>For <code>'ij,jk->ik'</code>:<ul><li>Free: <code>i</code>, <code>k</code> (appear in output)<li>Summation: <code>j</code> (appears in inputs but not output)</ul><p>This corresponds to nested loops:<pre><code data-lang=python># Conceptual equivalent of 'ij,jk->ik'
+for i in range(I):
+    for k in range(K):
+        C[i,k] = 0
+        for j in range(J):  # Summation index → innermost
+            C[i,k] += A[i,j] * B[j,k]
+</code></pre><h2 id=tensor-contraction>Tensor Contraction</h2><p><strong>Tensor contraction</strong> generalizes matrix multiplication to higher dimensions. When we sum over shared indices, we're "contracting" tensors:<p>$$\text{result}<em>i = \sum_j A_i \cdot B</em>{i,j}$$<p>This is exactly what einsum does: multiply tensors and sum over specified indices.<h2 id=einsum-in-attention>Einsum in Attention</h2><p>The attention mechanism is a perfect use case for einsum. Let's see how each step maps:<h3 id=standard-indices-convention>Standard Indices Convention</h3><table><thead><tr><th>Index<th>Meaning<tbody><tr><td><code>b</code><td>Batch size<tr><td><code>l</code> or <code>i</code><td>Query sequence length<tr><td><code>m</code> or <code>j</code><td>Key/memory sequence length<tr><td><code>d</code><td>Model dimension<tr><td><code>h</code><td>Head index<tr><td><code>k</code><td>Per-head dimension</table><h3 id=single-head-attention>Single-Head Attention</h3><p><strong>Attention scores</strong> (query-key dot product):<p>$$S_{ij} = \frac{1}{\sqrt{d_k}} \sum_a Q_{ia} K_{ja}$$<pre><code data-lang=python># S^{ij} = Q^{ia} K^{ja} / sqrt(d_k)
+S = jnp.einsum('ia,ja->ij', Q, K) / jnp.sqrt(d_k)
+</code></pre><p><strong>Attention output</strong> (weighted sum of values):<p>$$O_{ib} = \sum_j A_{ij} V_{jb}$$<pre><code data-lang=python># O^{ib} = A^{ij} V^{jb}
+O = jnp.einsum('ij,jb->ib', A, V)
+</code></pre><h3 id=multi-head-attention>Multi-Head Attention</h3><p>Multi-head attention adds a head index <code>h</code>:<p><strong>Project to query space</strong>:<p>$$Q^{hia} = \sum_d X_{id} W_Q^{hda}$$<pre><code data-lang=python># Project input to per-head queries
+Q_h = jnp.einsum('id,hda->hia', X, W_Q)
+</code></pre><p><strong>Attention scores per head</strong>:<p>$$S^{hij} = \sum_a Q^{hia} K^{hja} / \sqrt{d_k}$$<pre><code data-lang=python>S = jnp.einsum('hia,hja->hij', Q_h, K_h) / jnp.sqrt(d_k)
+</code></pre><p><strong>Weighted values per head</strong>:<p>$$O^{hic} = \sum_j A^{hij} V^{hjc}$$<pre><code data-lang=python>O = jnp.einsum('hij,hjc->hic', A, V_h)
+</code></pre><p><strong>Combine heads</strong>:<p>$$Y_{id} = \sum_{h,c} O^{hic} W_O^{hcd}$$<pre><code data-lang=python>Y = jnp.einsum('hic,hcd->id', O, W_O)
+</code></pre><h3 id=batched-multi-head-attention>Batched Multi-Head Attention</h3><p>Add batch dimension <code>b</code>:<pre><code data-lang=python># Project queries: X is (batch, seq, d_model)
+Q_h = jnp.einsum('bid,hda->bhia', X, W_Q)
+
+# Scores: (batch, heads, seq_q, seq_k)
+S = jnp.einsum('bhia,bhja->bhij', Q_h, K_h) / jnp.sqrt(d_k)
+
+# Weighted values
+O = jnp.einsum('bhij,bhjc->bhic', A, V_h)
+
+# Combine heads
+Y = jnp.einsum('bhic,hcd->bid', O, W_O)
+</code></pre><h2 id=complete-attention-block-example>Complete Attention Block Example</h2><p>Here's the full multi-head attention in einsum (adapted from <a href=https://github.com/xjdr-alt/simple_transformer rel=external>xjdr's JAX transformer</a>):<pre><code data-lang=python>def attention(input_bld, params):
+    """
+    B: batch size
+    L: sequence length
+    M: memory length 
+    D: model dimension
+    H: number of attention heads
+    K: size of each attention key/value
+    """
+    # Layer norm
+    normalized_bld = norm(input_bld, params.attn_norm)
+    
+    # Project to Q, K, V (summation over d)
+    query_blhk = jnp.einsum('bld,dhk->blhk', normalized_bld, params.w_q_dhk)
+    key_blhk = jnp.einsum('bld,dhk->blhk', normalized_bld, params.w_k_dhk)
+    value_blhk = jnp.einsum('bld,dhk->blhk', normalized_bld, params.w_v_dhk)
+    
+    # Attention scores (summation over k)
+    logits_bhlm = jnp.einsum('blhk,bmhk->bhlm', query_blhk, key_blhk)
+    
+    # Scale
+    _, l, h, k = query_blhk.shape
+    logits_bhlm = logits_bhlm / jnp.sqrt(k)
+    
+    # Causal mask
+    mask = jnp.triu(jnp.ones((l, l)), k=1)
+    logits_bhlm = logits_bhlm - jnp.inf * mask[None, None, :, :]
+    
+    # Softmax
+    weights_bhlm = jax.nn.softmax(logits_bhlm, axis=-1)
+    
+    # Weighted sum of values
+    wtd_values_blhk = jnp.einsum('blhk,bhlm->blhk', value_blhk, weights_bhlm)
+    
+    # Output projection
+    out_bld = jnp.einsum('blhk,hkd->bld', wtd_values_blhk, params.w_o_hkd)
+    
+    return out_bld
+</code></pre><h2 id=connection-to-tensor-calculus>Connection to Tensor Calculus</h2><p>Einsum is essentially index notation with automatic summation. Compare:<table><thead><tr><th>Math (index notation)<th>Einsum<tbody><tr><td>$C^{ik} = A^{ij} B_j^{\ k}$<td><code>'ij,jk->ik'</code><tr><td>$S^{ij} = Q^{ia} g_{ab} K^{jb}$<td><code>'ia,ab,jb->ij'</code><tr><td>$O^{ib} = A^{ij} V_j^{\ b}$<td><code>'ij,jb->ib'</code></table><p>The summation convention (sum over repeated indices) maps directly to einsum's rule: indices not in output are summed.<h2 id=common-patterns>Common Patterns</h2><table><thead><tr><th>Operation<th>Einsum<th>Notes<tbody><tr><td>Dot product<td><code>'i,i->'</code><td>Both indices same, sum<tr><td>Outer product<td><code>'i,j->ij'</code><td>No shared indices<tr><td>Hadamard product<td><code>'ij,ij->ij'</code><td>Element-wise, keep both<tr><td>Matrix mult<td><code>'ij,jk->ik'</code><td>Contract middle index<tr><td>Batch matmul<td><code>'bij,bjk->bik'</code><td>Preserve batch<tr><td>Bilinear form<td><code>'i,ij,j->'</code><td>$u^T M v$<tr><td>Trace of product<td><code>'ij,ji->'</code><td>$\text{tr}(AB)$</table><h2 id=why-einsum-is-faster>Why Einsum is Faster</h2><p>Einsum can be faster than explicit loops and reshapes because:<ol><li><strong>No intermediate arrays</strong>: Operations are fused<li><strong>No reshaping overhead</strong>: No need for <code>np.newaxis</code> or <code>reshape</code><li><strong>Optimized paths</strong>: Libraries find optimal contraction order</ol><p>Example speedup:<pre><code data-lang=python># Slow: requires reshape and intermediate array
+A = A[:, np.newaxis] * B  # Creates (3,4) temporary
+result = A.sum(axis=1)
+
+# Fast: single operation
+result = jnp.einsum('i,ij->i', A, B)
+</code></pre><h2 id=code-examples>Code Examples</h2><p>Using the library:<pre><code data-lang=python>from attn_tensors.attention import attention_scores, attention_output
+
+# Attention scores use einsum internally:
+# S = jnp.einsum("ia,ja->ij", Q, K)
+S = attention_scores(Q, K, scale=True)
+
+# Attention output:
+# O = jnp.einsum("ij,jb->ib", A, V)
+O = attention_output(A, V)
+</code></pre><p>Multi-head attention:<pre><code data-lang=python>from attn_tensors.multihead import multihead_attention
+
+# All projections use einsum:
+# Q_h = jnp.einsum("ib,hba->hia", Q, W_Q)
+# S = jnp.einsum("hia,hja->hij", Q_h, K_h)
+# O = jnp.einsum("hij,hjc->hic", A, V_h)
+# Y = jnp.einsum("hic,hca->ia", O, W_O)
+output = multihead_attention(Q, K, V, W_Q, W_K, W_V, W_O)
+</code></pre><h2 id=practice-problems>Practice Problems</h2><p>Try to write einsum strings for these operations:<ol><li><strong>Column-wise sum</strong>: $s_j = \sum_i A_{ij}$<li><strong>Row-wise mean</strong>: $m_i = \frac{1}{n} \sum_j A_{ij}$ (hint: einsum + divide)<li><strong>Frobenius norm squared</strong>: $|A|<em>F^2 = \sum</em>{i,j} A_{ij}^2$ (hint: square first)<li><strong>Bilinear form</strong>: $B(u,v) = u^a g_{ab} v^b$<li><strong>Batch outer product</strong>: $C_{bij} = a_{bi} b_{bj}$</ol><details><summary>Solutions</summary> <pre><code data-lang=python># 1. Column-wise sum
+s = jnp.einsum('ij->j', A)
+
+# 2. Row-wise mean
+m = jnp.einsum('ij->i', A) / A.shape[1]
+
+# 3. Frobenius norm squared
+norm_sq = jnp.einsum('ij,ij->', A, A)
+
+# 4. Bilinear form
+B = jnp.einsum('a,ab,b->', u, g, v)
+
+# 5. Batch outer product
+C = jnp.einsum('bi,bj->bij', a, b)
+</code></pre></details><h2 id=references>References</h2><p>This page draws from several excellent resources:<ul><li><a href=https://sankalp.bearblog.dev/einsum-new/ rel=external>Shape Rotation 101: An Intro to Einsum and Jax Transformers</a> by Sankalp<li><a href=https://obilaniu6266h16.wordpress.com/2016/02/04/einstein-summation-in-numpy/ rel=external>Einstein summation in NumPy</a><li><a href=https://ajcr.net/Basic-guide-to-einsum/ rel=external>Basic guide to einsum</a><li><a href=https://rockt.github.io/2018/04/30/einsum rel=external>Einstein summation in PyTorch</a><li><a href=https://github.com/xjdr-alt/simple_transformer rel=external>xjdr's simple JAX transformer</a></ul></article></main><footer><p>Built with <a href=https://www.getzola.org/ rel=noopener target=_blank>Zola</a> · <a href=https://github.com/planckeon/attn-as-bilinear-form rel=noopener target=_blank>Source on GitHub</a></footer>
