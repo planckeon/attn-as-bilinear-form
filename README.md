@@ -230,6 +230,23 @@ attn-as-bilinear-form/
 6. Amari (1998). *Natural Gradient Works Efficiently in Learning*. Neural Computation.
 7. Sankalp (2024). [*Shape Rotation 101: An Intro to Einsum and Jax Transformers*](https://sankalp.bearblog.dev/einsum-new/).
 
+## Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@misc{attn-bilinear,
+  author = {Kataru, Baalateja},
+  title = {Attention as Bilinear Form: A Physicist's Guide to Transformer Attention},
+  year = {2026},
+  publisher = {GitHub},
+  url = {https://github.com/planckeon/attn-as-bilinear-form},
+  note = {Tensor calculus, statistical mechanics, and differential geometry perspectives on attention}
+}
+```
+
+[Live Site](https://planckeon.github.io/attn-as-bilinear-form/)
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
